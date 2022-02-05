@@ -8,17 +8,17 @@ package hobbypos.ralphfx.model;
  *
  * @author Armero
  */
-public class Order {
-    
-     private  int orderid;
-     private int transactionid;
-     private int productid;
-     private int waiterid;
-     private int quantity;
-     private  int tableid;
-     private  String tableName;
+public class TempOrder {
 
-    public Order(int orderID, int productID , int transactionID ,int qquantity,   int tableID, int waiterID ) {
+    private  int orderid;
+    private int transactionid;
+    private int productid;
+    private int waiterid;
+    private int quantity;
+    private  int tableid;
+    private  String tableName;
+
+    public TempOrder(int orderID, int productID , int transactionID ,int qquantity,   int tableID, int waiterID ) {
         this.orderid = orderID;
         this.productid = productID;
         this.transactionid = transactionID;
@@ -26,7 +26,7 @@ public class Order {
         this.tableid = tableID;
         this.waiterid = waiterID;
     }
- 
+
 
     public int getId() {
         return orderid;
@@ -35,7 +35,7 @@ public class Order {
     public String getTableName() {
         return this.tableName;
     }
-    
+
     public void setTablename(String tablename){
         this.tableName = tablename;
     }
@@ -52,5 +52,5 @@ public class Order {
         this.quantity = qquantity;
     }
 
-    
+
 }

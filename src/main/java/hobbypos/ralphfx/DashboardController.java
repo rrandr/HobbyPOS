@@ -28,13 +28,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -56,8 +51,12 @@ public class DashboardController implements Initializable {
     private Label lblUsername;
     @FXML
     private Button btnManageTable;
-
-    private TilePane hboxx;
+    @FXML
+    private Button newOrder;
+    @FXML
+    private Button addOrder;
+    @FXML
+    private Button modifyT;
 
     Scene fxmlFile;
     Parent root;
@@ -81,10 +80,16 @@ public class DashboardController implements Initializable {
     private TableColumn<Products, String> itemPrice;
 
     @FXML
+    private  ScrollPane scrollpane1;
+
+    @FXML
+    private  ScrollPane scrollpane2;
+
+    @FXML
     private TableView<Products> itemOrder;
     DataObj jbdc;
     Order data;
-
+    String TableName;
     /**
      * Initializes the controller class.
      */
@@ -133,17 +138,24 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
+    public void orderProp(ActionEvent event){
+        newOrder.setDisable(true);
+        addOrder.setDisable(true);
+    }
+
+    @FXML
     private void newOrder(ActionEvent event) {
         try {
                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
                         Parent root = fxmlLoader.load();
-
+                        OrderController controller = (OrderController) fxmlLoader.getController();
+                        controller.setUsername(TableName);
                         Stage stage = new Stage();
                         stage.setTitle("Hobby Bar POS | New Order");
                         stage.setScene(new Scene(root));
                         stage.show();
                         ((Node) (event.getSource())).getScene().getWindow().hide();
-                       
+
         } catch (Exception ex) {
             System.out.println("" + ex.getMessage());
             ex.printStackTrace();
@@ -302,36 +314,31 @@ public class DashboardController implements Initializable {
                 String tableid = resultSet.getString("id");//extract button text, adapt the String to the columnname that you are interested in
                 Button btn = new Button(tablename);
                 btn.setTranslateX(8);
-                // btn.setTranslateY(20);
                 btn.setPrefSize(150, 40);
-                //btn.setMaxHeight(30);
-                // btn.setMaxWidth(250);
-                btn.setId(tableid);
-                btn.setOnAction(event -> {try {
-                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
-                        Parent root = fxmlLoader.load();
+                btn.setOnMousePressed(mouseEvent -> {
+                    newOrder.setDisable(false);
+                    addOrder.setDisable(false);
 
-                        Stage stage = new Stage();
-                        stage.setTitle("Hobby Bar POS | New Order");
-                        stage.setScene(new Scene(root));
-                        stage.show();
-                        ((Node) (event.getSource())).getScene().getWindow().hide();
-                        OrderController controller = (OrderController) fxmlLoader.getController();
-                        controller.setUsername(tablename);
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 });
+                btn.setId(tableid);
+                btn.setOnAction(event -> {
+
+                                TableName = tablename;
+                                System.err.println(TableName);
+
+                            });
                 stackPane.getChildren().add(btn);
                 buttonlist.add(stackPane);
             }
+
 
             availTable.getChildren().clear(); //remove all Buttons that are currently in the container
             availTable.setPadding(new Insets(10, 10, 10, 10));
             availTable.setHgap(10);
             availTable.setVgap(10);
             availTable.getChildren().addAll(buttonlist); //then add all your Buttons that you just created
+
+            scrollpane1.setContent(availTable);
             System.out.println("Pasok diri: " + resultSet);
 
         } catch (SQLException e) {
@@ -372,23 +379,16 @@ public class DashboardController implements Initializable {
                 btn.setMaxWidth(100);
                 btn.setGraphic(view);
                 btn.setId(tableid);
+                btn.setOnMousePressed(mouseEvent -> {
+                    newOrder.setDisable(true);
+                    addOrder.setDisable(false);
+                    modifyT.setDisable(false);
+
+                });
                 btn.setOnAction(event -> {
 
-                    try {
-                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
-                        Parent root = fxmlLoader.load();
-
-                        Stage stage = new Stage();
-                        stage.setTitle("Hobby Bar POS | New Order");
-                        stage.setScene(new Scene(root));
-                        stage.show();
-                        ((Node) (event.getSource())).getScene().getWindow().hide();
-                        OrderController controller = (OrderController) fxmlLoader.getController();
-                        controller.setUsername(tablename);
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    TableName = tablename;
+                    System.err.println(TableName);
 
                 });
                 stackPane.getChildren().add(btn);
@@ -411,6 +411,7 @@ public class DashboardController implements Initializable {
             tableUsed.setHgap(10);
             tableUsed.setVgap(10);
             tableUsed.getChildren().addAll(buttonlist); //then add all your Buttons that you just created
+            scrollpane2.setContent(tableUsed);
             System.out.println("Pasok Ako: " + resultSet);
 
         } catch (SQLException e) {

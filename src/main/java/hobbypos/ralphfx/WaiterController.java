@@ -8,6 +8,8 @@ import hobbypos.ralphfx.model.Tables;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+
+import hobbypos.ralphfx.model.Waiter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,7 +31,7 @@ import hobbypos.ralphfx.modal.DataObj;
  *
  * @author Admin
  */
-public class TablesController implements Initializable {
+public class WaiterController implements Initializable {
 
     @FXML
     private TextField tfTableName;
@@ -39,71 +41,81 @@ public class TablesController implements Initializable {
     private Button btnUpdate;
     @FXML
     private Button btnDelete;
+    @FXML
+    private Button btnAssign;
 
     @FXML
-    private TableView<Tables> tvTables;
+    private TableView<Waiter> tvTables;
 
     @FXML
-    private TableColumn<Tables, Integer> colId;
+    private TableColumn<Waiter, Integer> colId;
     @FXML
-    private TableColumn<Tables, String> colName;
+    private TableColumn<Waiter, String> colName;
+    @FXML
+    private  TableColumn<Waiter,String> colLocation;
 
     DataObj jdbc;
 
-    
-    
+
+    private ObservableList<Waiter> waiterList;
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        
-        
+
+
         jdbc = new DataObj();
-        showTable();
+        showWaiter();
         addListenerForTable();
-        
-    } 
-    
-    public void showTable(){
-        ObservableList<Tables> list = getTableList();
-        colId.setCellValueFactory(new PropertyValueFactory<Tables, Integer>("id"));
-        colName.setCellValueFactory(new PropertyValueFactory<Tables, String>("name"));        
-        tvTables.setItems(list);
+
     }
-    
+
+    @FXML
+    public void showWaiter(){
+
+        ObservableList<Waiter> list = getWaiterList();
+        colId.setCellValueFactory(new PropertyValueFactory<Waiter, Integer>("id"));
+        colName.setCellValueFactory(new PropertyValueFactory<Waiter, String>("name"));
+        colLocation.setCellValueFactory(new PropertyValueFactory<Waiter, String>("location"));
+        tvTables.setItems(list);
+
+        System.out.println("pasok"+ tvTables);
+    }
+
     private void insertRecord(){
         String name = tfTableName.getText();
         if(!name.isEmpty()){
-            String query = "INSERT INTO `tbltables` (name) VALUES('" + name + "')";
+            String query = "INSERT INTO `waiter` (name,location) VALUES('" + name + "','1')";
             DashboardController dash = new DashboardController();
             executeQuery(query);
-            showTable();
+            showWaiter();
             tfTableName.setText("");
         }
     }
 
-    private ObservableList<Tables> getTableList() {
-     ObservableList<Tables> tableList = FXCollections.observableArrayList();
-     Connection conn = jdbc.getConnection();
-     String query = "SELECT * FROM tbltables";
-     Statement st;
-     ResultSet rs;
-     
-     try{
-         st = conn.createStatement();
-         rs = st.executeQuery(query);
-         Tables tables;
-         while(rs.next()){
-             tables = new Tables(rs.getInt("id"), rs.getString("name"));
-             tableList.add(tables);
-         }
-     }catch(Exception ex){
-         System.out.println(ex.getMessage());
-     }
-     
-     return tableList;
+    @FXML
+    private ObservableList<Waiter> getWaiterList() {
+        ObservableList<Waiter> waiterList = FXCollections.observableArrayList();
+        Connection conn = jdbc.getConnection();
+        String query = "SELECT * FROM waiter WHERE location = '1'";
+        Statement st;
+        ResultSet rs;
+
+        try{
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            Waiter waiter;
+            while(rs.next()){
+                waiter = new Waiter(rs.getInt("waiterID"), rs.getString("name"),rs.getString("location"));
+                waiterList.add(waiter);
+            }
+        }catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        System.out.println(waiterList);
+        return waiterList;
     }
 
     private void executeQuery(String query) {
@@ -116,19 +128,19 @@ public class TablesController implements Initializable {
         }catch(Exception ex){
             System.out.println("error while inserting record.");
             ex.printStackTrace();
-        } 
+        }
     }
 
     @FXML
     private void saveTable(ActionEvent event) {
         insertRecord();
     }
-    
+
     private void addListenerForTable(){
         tvTables.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) -> {
             if(newSelection != null){
                 btnUpdate.setDisable(false);
-                btnDelete.setDisable(false);                
+                btnDelete.setDisable(false);
                 tfTableName.setText(newSelection.getName());
 
             }else{
@@ -144,30 +156,33 @@ public class TablesController implements Initializable {
     private void editEntry(ActionEvent event) {
         Connection conn = jdbc.getConnection();
         try{
-            Tables table = tvTables.getSelectionModel().getSelectedItem();
-            String query = "UPDATE tbltables SET name = '" + tfTableName.getText() + " ' WHERE id = '" + table.getId() + "'";
+            Waiter waiter = tvTables.getSelectionModel().getSelectedItem();
+            String query = "UPDATE waiter SET name = '" + tfTableName.getText() + " ' WHERE waiterid = '" + waiter.getId() + "'";
             executeQuery(query);
-            showTable();
-            
+            showWaiter();
+
         }catch(Exception ex){
             System.out.println(ex.getMessage());
         }
 
 
+
     }
+
+
 
     @FXML
     private void deleteEntry(ActionEvent event) {
-         Connection conn = jdbc.getConnection();
+        Connection conn = jdbc.getConnection();
         try{
-            Tables table = tvTables.getSelectionModel().getSelectedItem();
-            String query = "DELETE FROM tbltables WHERE id = '" + table.getId() + "'";
+            Waiter waiter = tvTables.getSelectionModel().getSelectedItem();
+            String query = "DELETE FROM waiter WHERE waiterid = '" + waiter.getId() + "'";
             executeQuery(query);
-            showTable();
-            
+            showWaiter();
+
         }catch(Exception ex){
             System.out.println(ex.getMessage());
         }
     }
-    
+
 }

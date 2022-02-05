@@ -153,7 +153,7 @@ public class ProductsController implements Initializable {
 
     public void showProducts() {
         ObservableList<Products> list = getProductList();
-        colId.setCellValueFactory(new PropertyValueFactory<Products, Integer >("pluID"));
+        colId.setCellValueFactory(new PropertyValueFactory<Products, Integer >("id"));
         colDescription.setCellValueFactory(new PropertyValueFactory<Products, String>("description"));
         colPrice.setCellValueFactory(new PropertyValueFactory<Products, String>("price"));
         colCategory.setCellValueFactory(new PropertyValueFactory<Products, String>("category"));
