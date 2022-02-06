@@ -4,6 +4,7 @@
  */
 package hobbypos.ralphfx;
 
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,14 +14,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hobbypos.ralphfx.model.Order;
+import hobbypos.ralphfx.model.Products;
 import hobbypos.ralphfx.model.TempOrder;
 import hobbypos.ralphfx.model.Waiter;
 import javafx.animation.KeyFrame;
@@ -36,6 +36,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
@@ -51,6 +52,8 @@ import javafx.stage.Stage;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static java.sql.Types.NULL;
 
 /**
  * FXML Controller class
@@ -74,14 +77,39 @@ public class OrderController implements Initializable {
     private ScrollPane scrollbox;
 
     @FXML
+    private Button oMinusQuant;
+    @FXML
+    private Button oAddQuant;
+    @FXML
+    private TextField oQuantity;
+    @FXML
     public Text waiterName;
+    @FXML
+    public Label totalDisplay;
 
     @FXML
-    public ComboBox mywaiterList;
+    public ComboBox<String> mywaiterList;
+    @FXML
+    private TableView<TempOrder> tableOrder;
+    @FXML
+    private TableColumn<TempOrder, Integer> orderQnt;
+    @FXML
+    private TableColumn<TempOrder, Integer> orderTotal;
+    @FXML
+    private TableColumn<TempOrder, String> orderDesc;
+    @FXML
+    private TableColumn<TempOrder, Integer> orderPrice;
+
 
     Scene fxmlFile;
     Parent root;
     Stage window;
+
+    int pID;
+    String pName;
+    int pQuantity;
+    int pPrice;
+    int ttotalDisplay;
 
     TempOrder tempOrder;
     String transactionids;
@@ -91,17 +119,41 @@ public class OrderController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        jdbc = new DataObj();
         getTransactionID();
+        populateWaiterList();
         try {
-
             getCategories();
-
-
         } catch (SQLException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+
+    private void populateWaiterList() {
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        //System.out.println(query);
+        ObservableList<String> list = FXCollections.observableArrayList();
+        try {
+            //st = conn.createStatement();
+            //st.executeUpdate(query);
+
+            ResultSet rs = conn.createStatement().executeQuery("select * from waiter where location='1'");
+            while (rs.next()) {
+                list.add(rs.getString("name"));
+//              cbCategories.add(rs.getString("name"));
+            }
+
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
+
+        mywaiterList.setItems(null);
+        mywaiterList.setItems(list);
+
+    }
 
 
     private void setPrimaryStage(Stage pStage) {
@@ -131,6 +183,52 @@ public class OrderController implements Initializable {
         transactionids = (dtf.format(now));
     }
 
+    private void saveOrder() {
+
+        ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+        String waiterName = mywaiterList.getSelectionModel().getSelectedItem();
+        TempOrder temporder;
+        temporder = new TempOrder(NULL, Integer.parseInt(transactionids), pID, pName, pPrice, pQuantity, tableNumtxt.getText(), waiterName);
+        tempOrderList.add(temporder);
+
+    }
+
+    @FXML
+    private void addtoOrder(ActionEvent event) {
+        displayOrder();
+    }
+
+    private ObservableList<TempOrder> getTempList() {
+
+        int quantity = Integer.parseInt(oQuantity.getText());
+        int Total = pPrice * quantity;
+        TempOrder temporderD;
+        ObservableList<TempOrder> displayOrderList = FXCollections.observableArrayList();
+        System.err.println(pName+pPrice+quantity+Total);
+
+        temporderD = new TempOrder(pName, pPrice, quantity, Total);
+        displayOrderList.add(temporderD);
+
+        ttotalDisplay = ttotalDisplay + Total;
+        return displayOrderList;
+    }
+
+    public void displayOrder(){
+
+        ObservableList<TempOrder> list = getTempList();
+        orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+        orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+        orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
+       if(list.isEmpty()){
+        tableOrder.setItems(list);
+        totalDisplay.setText("₱ "+Integer.toString(ttotalDisplay));
+       }else{
+           tableOrder.getItems().addAll(list);totalDisplay.setText("₱ "+Integer.toString(ttotalDisplay));
+       }
+    }
+
+
 
     @FXML
     private void manageWaiter(ActionEvent event) {
@@ -143,7 +241,52 @@ public class OrderController implements Initializable {
 
     }
 
+    private ObservableList<TempOrder> getOrderList() {
+        ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+        Connection conn = jdbc.getConnection();
+        String query = "SELECT * FROM temporder WHERE transactionid=" + Integer.parseInt(transactionids);
+        Statement st;
+        ResultSet rs;
 
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            TempOrder temporder;
+            while (rs.next()) {
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getInt("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
+                tempOrderList.add(temporder);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return tempOrderList;
+    }
+
+
+    @FXML
+    public void quantityHandler(ActionEvent event) {
+
+        final Node Source = (Node) event.getSource();
+
+        int quantity = Integer.parseInt(oQuantity.getText());
+        if (Source.getId().equals("oAddQuant")) {
+            if (quantity > 0) {
+                ++quantity;
+                oQuantity.setText(Integer.toString(quantity));
+
+            }
+        }
+        if (Source.getId().equals("oMinusQuant")) {
+
+            if (quantity > 1) {
+                --quantity;
+                oQuantity.setText(Integer.toString(quantity));
+
+            }
+        }
+
+    }
 
     @FXML
     private void handleKeyPressed(KeyEvent event) throws IOException {
@@ -299,7 +442,11 @@ public class OrderController implements Initializable {
                 btn.setId(productid);
                 btn.setOnAction(event -> {
 
-                    System.out.println(productname + " - " + productid);
+                    pID = Integer.parseInt(productid);
+                    pName = productname;
+                    pPrice = Integer.parseInt(price);
+                    oQuantity.setText("1");
+                    System.out.println(pName + " - " + pID);
                     lblFoodName.setText(productname);
                 });
                 stackPane.getChildren().add(btn);

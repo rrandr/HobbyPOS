@@ -13,18 +13,30 @@ public class TempOrder {
     private  int orderid;
     private int transactionid;
     private int productid;
-    private int waiterid;
+    private int price;
     private int quantity;
-    private  int tableid;
+    private  String tablename;
+    private String waitername;
+    private String productname;
     private  String tableName;
+    private int total;
 
-    public TempOrder(int orderID, int productID , int transactionID ,int qquantity,   int tableID, int waiterID ) {
+    public TempOrder(int orderID, int transactionID, int productID ,String productName,int pPrice ,int qquantity, String tName, String waiterN) {
         this.orderid = orderID;
         this.productid = productID;
+        this.productname = productName;
+        this.price=pPrice;
         this.transactionid = transactionID;
         this.quantity = qquantity;
-        this.tableid = tableID;
-        this.waiterid = waiterID;
+        this.tablename = tName;
+        this.waitername = waiterN;
+    }
+
+    public TempOrder(String productname , int pPrice , int pQuantity , int ptotal){
+        this.productname = productname;
+        this.price=pPrice;
+        this.quantity = pQuantity;
+        this.total = ptotal;
     }
 
 
@@ -32,15 +44,15 @@ public class TempOrder {
         return orderid;
     }
 
-    public String getTableName() {
+    public String getTableN() {
         return this.tableName;
     }
 
-    public void setTablename(String tablename){
+    public void setTname(String tablename){
         this.tableName = tablename;
     }
-    public void setTableID(int tableID){
-        this.orderid = tableID;
+    public void setTableName(String tableN){
+        this.tablename = tableN;
     }
     public void setProductID(int productID){
         this.productid = productID;
@@ -51,6 +63,43 @@ public class TempOrder {
     public void setQuantity(int qquantity){
         this.quantity = qquantity;
     }
+    public void setPrice(int price) {
+        this.price = price;
+    }
 
+    public void setTotal(int ptotal) {
+        total = ptotal;
+    }
+    public int getTotal() {
+        return total;
+    }
 
+    public String getWaitername() {
+        return waitername;
+    }
+
+    public int getOrderid() {
+        return orderid;
+    }
+    public int getPrice() {
+        return price;
+    }
+    public int getProductid() {
+        return productid;
+    }
+    public int getTransactionid() {
+        return transactionid;
+    }
+    public int getQuantity() {
+        return quantity;
+    }
+    public String getTableName() {
+        return tablename;
+    }
+    public String getWaiterid() {
+        return waitername;
+    }
+    public String getProductname() {
+        return productname;
+    }
 }

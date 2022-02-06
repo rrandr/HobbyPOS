@@ -50,38 +50,39 @@
          <children>
             <Pane prefHeight="60.0" prefWidth="200.0">
                <children>
-                  <Label layoutX="313.0" layoutY="1.0" text="0.0" textFill="#0162ff">
+                  <Label fx:id="totalDisplay" layoutX="13.0" layoutY="1.0" text="0.0" textFill="#0162ff">
                      <font>
                         <Font size="40.0" />
                      </font>
                   </Label>
                </children>
             </Pane>
-            <TableView prefHeight="385.0" prefWidth="369.0">
+            <TableView fx:id="tableOrder" prefHeight="385.0" prefWidth="369.0">
               <columns>
-                <TableColumn prefWidth="74.0" text="Quantity" />
-                <TableColumn prefWidth="187.0" text="Description" />
-                  <TableColumn prefWidth="60.0" text="Total" />
+                <TableColumn fx:id="orderQnt" prefWidth="58.0" text="Quantity" />
+                <TableColumn fx:id="orderDesc" prefWidth="170.0" text="Description" />
+                  <TableColumn fx:id="orderPrice" prefWidth="49.0" text="Price" />
+                  <TableColumn fx:id="orderTotal" prefWidth="46.0" text="Total" />
               </columns>
             </TableView>
             <HBox prefHeight="68.0" prefWidth="369.0">
                <children>
-                  <Button fx:id="oMinusQuant" mnemonicParsing="false" prefHeight="34.0" prefWidth="56.0" style="-fx-background-color: #26c6da;" text="-" textFill="WHITE">
+                  <Button fx:id="oMinusQuant" mnemonicParsing="false" onAction="#quantityHandler" prefHeight="34.0" prefWidth="56.0" style="-fx-background-color: #26c6da;" text="-" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>
                   </Button>
                   <TextField fx:id="oQuantity" alignment="CENTER" editable="false" prefHeight="52.0" prefWidth="52.0" text="1">
                      <font>
-                        <Font size="24.0" />
+                        <Font size="20.0" />
                      </font>
                   </TextField>
-                  <Button fx:id="oAddQuant" mnemonicParsing="false" prefHeight="34.0" prefWidth="56.0" style="-fx-background-color: #26c6da;" text="+" textFill="WHITE">
+                  <Button fx:id="oAddQuant" mnemonicParsing="false" onAction="#quantityHandler" prefHeight="34.0" prefWidth="56.0" style="-fx-background-color: #26c6da;" text="+" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>
                   </Button>
-                  <Button fx:id="backBtn1" mnemonicParsing="false" prefHeight="49.0" prefWidth="115.0" style="-fx-background-color: #f0932b;" text="Add to Order" textFill="WHITE">
+                  <Button fx:id="addToOrderBtn" mnemonicParsing="false" onAction="#addtoOrder" prefHeight="49.0" prefWidth="115.0" style="-fx-background-color: #f0932b;" text="Add to Order" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -101,7 +102,7 @@
    <bottom>
       <HBox prefHeight="65.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #ccc;" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#manageWaiter" prefHeight="54.0" prefWidth="159.0" style="-fx-background-color: #26c6da;" text="[F1 - Assign Waiter]" textFill="WHITE">
+            <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#manageWaiter" prefHeight="54.0" prefWidth="159.0" style="-fx-background-color: #26c6da;" text="[F1 - Modify Waiter]" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
@@ -157,13 +158,13 @@
                         <Font size="15.0" />
                      </font>
                   </Label>
-                  <Label layoutX="12.0" layoutY="33.0" text="Waiter :">
+                  <Label layoutX="11.0" layoutY="38.0" text="Waiter :">
                      <font>
                         <Font size="15.0" />
                      </font>
                   </Label>
                   <Text fx:id="tableNumtxt" layoutX="74.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-                  <ComboBox fx:id="waiterList" layoutX="74.0" layoutY="31.0" prefHeight="25.0" prefWidth="109.0" />
+                  <ComboBox fx:id="mywaiterList" layoutX="74.0" layoutY="31.0" prefHeight="34.0" prefWidth="109.0" promptText="Select Waiter" />
                </children></Pane>
             <TilePane fx:id="catTile" prefHeight="527.0" prefWidth="193.0" />
          </children></VBox>
@@ -197,7 +198,7 @@
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
                            <children>
-                              <TilePane fx:id="productBox" prefHeight="595.0" prefWidth="812.0" />
+                              <TilePane fx:id="productBox" prefHeight="507.0" prefWidth="694.0" />
                            </children>
                         </AnchorPane>
                      </content>
