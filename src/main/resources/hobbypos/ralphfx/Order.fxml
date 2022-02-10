@@ -92,7 +92,7 @@
                   </Button>
                </children>
             </HBox>
-            <Button fx:id="saveOrdBtn" mnemonicParsing="false" prefHeight="49.0" prefWidth="115.0" style="-fx-background-color: #f0932b;" text="Save Order" textFill="WHITE">
+            <Button fx:id="saveOrdBtn" disable="true" mnemonicParsing="false" onAction="#saveOrder" prefHeight="49.0" prefWidth="115.0" style="-fx-background-color: #f0932b;" text="Save Order" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
@@ -107,7 +107,7 @@
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
-            <Button layoutX="189.0" layoutY="20.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="159.0" style="-fx-background-color: #26c6da;" text="[F2 - Delete Item]" textFill="WHITE">
+            <Button fx:id="DeleteItemBtn" disable="true" layoutX="189.0" layoutY="20.0" mnemonicParsing="false" onAction="#removeOrderItem" prefHeight="54.0" prefWidth="159.0" style="-fx-background-color: #26c6da;" text="[F2 - Delete Item]" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>

@@ -11,7 +11,7 @@ package hobbypos.ralphfx.model;
 public class TempOrder {
 
     private  int orderid;
-    private int transactionid;
+    private String transactionid;
     private int productid;
     private int price;
     private int quantity;
@@ -21,7 +21,7 @@ public class TempOrder {
     private  String tableName;
     private int total;
 
-    public TempOrder(int orderID, int transactionID, int productID ,String productName,int pPrice ,int qquantity, String tName, String waiterN) {
+    public TempOrder(int orderID, String transactionID, int productID ,String productName,int pPrice ,int qquantity, String tName, String waiterN) {
         this.orderid = orderID;
         this.productid = productID;
         this.productname = productName;
@@ -57,7 +57,7 @@ public class TempOrder {
     public void setProductID(int productID){
         this.productid = productID;
     }
-    public void setTransactionID(int transactionID){
+    public void setTransactionID(String transactionID){
         this.transactionid = transactionID;
     }
     public void setQuantity(int qquantity){
@@ -87,7 +87,7 @@ public class TempOrder {
     public int getProductid() {
         return productid;
     }
-    public int getTransactionid() {
+    public String getTransactionid() {
         return transactionid;
     }
     public int getQuantity() {

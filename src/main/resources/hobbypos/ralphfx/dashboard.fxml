@@ -47,7 +47,7 @@
             <children>
                 <Pane prefHeight="60.0" prefWidth="200.0">
                     <children>
-                        <Label layoutX="191.0" layoutY="6.0" text="0.0" textFill="WHITE">
+                        <Label fx:id="totalDisplay" layoutX="7.0" layoutY="6.0" text="0.0" textFill="WHITE">
                             <font>
                                 <Font name="Lato Regular" size="40.0" />
                             </font>

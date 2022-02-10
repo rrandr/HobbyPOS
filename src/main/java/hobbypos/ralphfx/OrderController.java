@@ -9,10 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,6 +50,7 @@ import javafx.stage.Stage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static java.lang.System.in;
 import static java.sql.Types.NULL;
 
 /**
@@ -81,6 +79,8 @@ public class OrderController implements Initializable {
     @FXML
     private Button oAddQuant;
     @FXML
+    private Button saveOrdBtn;
+    @FXML
     private TextField oQuantity;
     @FXML
     public Text waiterName;
@@ -100,6 +100,8 @@ public class OrderController implements Initializable {
     @FXML
     private TableColumn<TempOrder, Integer> orderPrice;
 
+    @FXML
+    private Button DeleteItemBtn;
 
     Scene fxmlFile;
     Parent root;
@@ -112,8 +114,11 @@ public class OrderController implements Initializable {
     int ttotalDisplay;
 
     TempOrder tempOrder;
+    Order newOrder;
     String transactionids;
     DataObj jdbc;
+
+    ObservableList<TempOrder> finalOrder = FXCollections.observableArrayList();
 
     private static Stage pStage;
 
@@ -121,6 +126,7 @@ public class OrderController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         jdbc = new DataObj();
         getTransactionID();
+        addListenerForTable();
         populateWaiterList();
         try {
             getCategories();
@@ -183,18 +189,65 @@ public class OrderController implements Initializable {
         transactionids = (dtf.format(now));
     }
 
-    private void saveOrder() {
+    @FXML
+    private void saveOrder(ActionEvent event) {
 
-        ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
-        String waiterName = mywaiterList.getSelectionModel().getSelectedItem();
-        TempOrder temporder;
-        temporder = new TempOrder(NULL, Integer.parseInt(transactionids), pID, pName, pPrice, pQuantity, tableNumtxt.getText(), waiterName);
-        tempOrderList.add(temporder);
+
+
+        try {
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Order");
+            alert.setHeaderText("Confirm Order?");
+
+            // option != null.
+            Optional<ButtonType> option = alert.showAndWait();
+
+            if (option.get() == ButtonType.OK) {
+
+
+
+                insertRecord();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
+                Parent root = fxmlLoader.load();
+
+                Stage stage = new Stage();
+                stage.setTitle("Hobby Bar POS | Dashboard");
+                stage.setScene(new Scene(root));
+                stage.show();
+                ((Node) (event.getSource())).getScene().getWindow().hide();
+
+            } else if (option.get() == ButtonType.CANCEL) {
+
+            }
+
+
+        } catch (Exception ex) {
+            System.out.println("" + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void removeOrderItem(ActionEvent event) {
+        int index = tableOrder.getSelectionModel().getSelectedIndex();
+        TempOrder getTempData = tableOrder.getSelectionModel().getSelectedItem();
+        if (index >= 0) {
+            tableOrder.getItems().remove(index);
+
+            int removed = getTempData.getPrice();
+            ttotalDisplay = ttotalDisplay - removed;
+            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
+        }
+
+
 
     }
 
     @FXML
     private void addtoOrder(ActionEvent event) {
+        saveOrdBtn.setDisable(false);
         displayOrder();
     }
 
@@ -204,28 +257,57 @@ public class OrderController implements Initializable {
         int Total = pPrice * quantity;
         TempOrder temporderD;
         ObservableList<TempOrder> displayOrderList = FXCollections.observableArrayList();
-        System.err.println(pName+pPrice+quantity+Total);
-
-        temporderD = new TempOrder(pName, pPrice, quantity, Total);
+        String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
+        temporderD = new TempOrder(NULL,transactionids,pID,pName, pPrice, quantity,tableNumtxt.getText(),waiterName);
         displayOrderList.add(temporderD);
+
+        if(displayOrderList.isEmpty()){
+
+            saveOrdBtn.setDisable(true);
+
+        }
 
         ttotalDisplay = ttotalDisplay + Total;
         return displayOrderList;
     }
 
-    public void displayOrder(){
+    public void displayOrder() {
 
         ObservableList<TempOrder> list = getTempList();
+
+
         orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
         orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
         orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
-       if(list.isEmpty()){
-        tableOrder.setItems(list);
-        totalDisplay.setText("₱ "+Integer.toString(ttotalDisplay));
-       }else{
-           tableOrder.getItems().addAll(list);totalDisplay.setText("₱ "+Integer.toString(ttotalDisplay));
-       }
+        orderTotal.setCellValueFactory( new PropertyValueFactory<TempOrder, Integer>("price"));
+
+        if (list.isEmpty()) {
+            tableOrder.setItems(list);
+            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
+        } else {
+            saveOrdBtn.setDisable(false);
+            tableOrder.getItems().addAll(list);
+            finalOrder.addAll(list);
+            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
+        }
+
+    }
+
+    private void addListenerForTable() {
+        tableOrder.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                DeleteItemBtn.setDisable(false);
+
+            } else {
+                DeleteItemBtn.setDisable(true);
+
+            }
+
+        });
+
+
     }
 
 
@@ -253,7 +335,7 @@ public class OrderController implements Initializable {
             rs = st.executeQuery(query);
             TempOrder temporder;
             while (rs.next()) {
-                temporder = new TempOrder(rs.getInt("orderid"), rs.getInt("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
                 tempOrderList.add(temporder);
             }
         } catch (Exception ex) {
@@ -261,6 +343,79 @@ public class OrderController implements Initializable {
         }
 
         return tempOrderList;
+    }
+
+    private void insertRecord(){
+        Statement st;
+        ResultSet rs;
+
+
+
+        if(!finalOrder.isEmpty()){
+          try{
+              Connection conn = jdbc.getConnection();
+              conn.setAutoCommit(false);
+
+              PreparedStatement prepStmt = conn.prepareStatement("insert into temporder(orderid,transactionid,productid,productname,price,quantity,tableName,waiterName) values('" + NULL + "',?,?,?,?,?,?,?)");
+              Iterator<TempOrder> tp =  finalOrder.iterator();
+
+                  while (tp.hasNext()) {
+
+                      TempOrder tempO = tp.next();
+                      prepStmt.setString(1, tempO.getTransactionid());
+                      prepStmt.setInt(2, tempO.getProductid());
+                      prepStmt.setString(3, tempO.getProductname());
+                      prepStmt.setInt(4, tempO.getPrice());
+                      prepStmt.setInt(5, tempO.getQuantity());
+                      prepStmt.setString(6, tempO.getTableName());
+                      prepStmt.setString(7, tempO.getWaitername());
+                      prepStmt.addBatch();
+
+              }
+              int [] numUpdates=prepStmt.executeBatch();
+              for (int i=0; i < numUpdates.length; i++) {
+                  if (numUpdates[i] == -2)
+                      System.out.println("Execution " + i +
+                              ": unknown number of rows updated");
+                  else
+                      System.out.println("Execution " + i +
+                              "successful: " + numUpdates[i] + " rows updated");
+              }
+              conn.commit();
+
+              updateTableAvail();
+          } catch (SQLException e) {
+              e.printStackTrace();
+          }
+        }
+    }
+
+
+public void updateTableAvail(){
+
+
+    Connection conn = jdbc.getConnection();
+    try{
+
+        String query = "UPDATE tbltables SET tableavail = '1' WHERE name = '" + tableNumtxt.getText() + "'";
+        executeQuery(query);
+
+    }catch(Exception ex){
+        System.out.println(ex.getMessage());
+    }
+
+}
+    private void executeQuery(String query) {
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        System.out.println(query);
+        try {
+            st = conn.createStatement();
+            st.executeUpdate(query);
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
     }
 
 
@@ -379,7 +534,7 @@ public class OrderController implements Initializable {
         try {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Logout");
-            alert.setHeaderText("Are you sure want to Logout?");
+            alert.setHeaderText("Are you sure want to cancel the Order?");
 
             // option != null.
             Optional<ButtonType> option = alert.showAndWait();

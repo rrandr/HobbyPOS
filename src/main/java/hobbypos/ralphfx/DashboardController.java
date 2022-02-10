@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import hobbypos.ralphfx.model.TempOrder;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -71,13 +73,13 @@ public class DashboardController implements Initializable {
     private TilePane tableUsed;
 
     @FXML
-    private TableColumn<Products, Integer> itemQuan;
+    private TableColumn<TempOrder, Integer> itemQuan;
 
     @FXML
-    private TableColumn<Products, String> itemDesc;
+    private TableColumn<TempOrder, String> itemDesc;
 
     @FXML
-    private TableColumn<Products, String> itemPrice;
+    private TableColumn<TempOrder, Integer> itemPrice;
 
     @FXML
     private  ScrollPane scrollpane1;
@@ -86,9 +88,12 @@ public class DashboardController implements Initializable {
     private  ScrollPane scrollpane2;
 
     @FXML
-    private TableView<Products> itemOrder;
+    private Label totalDisplay;
+
+    @FXML
+    private TableView<TempOrder> itemOrder;
     DataObj jbdc;
-    Order data;
+    Order orderData;
     String TableName;
     /**
      * Initializes the controller class.
@@ -296,18 +301,18 @@ public class DashboardController implements Initializable {
         }
     }
 
+
     private void seeAvailableTable() throws SQLException {
 
         DataObj jdbcDao = new DataObj();
         Connection conn = jdbcDao.getConnection();
         Statement statement = conn.createStatement();
-        String sqlQuery = "SELECT * FROM tbltables;";
+        String sqlQuery = "SELECT * FROM tbltables WHERE tableavail = 0";
         ResultSet resultSet = statement.executeQuery(sqlQuery);
 
         List<StackPane> buttonlist = new ArrayList<>(); //our Collection to hold newly created Buttons
 
         try {
-
             while (resultSet.next()) { //iterate over every row returned
                 StackPane stackPane = new StackPane();
                 String tablename = resultSet.getString("name");
@@ -317,15 +322,14 @@ public class DashboardController implements Initializable {
                 btn.setPrefSize(150, 40);
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(false);
-                    addOrder.setDisable(false);
-
+                    modifyT.setDisable(true);
+                    addOrder.setDisable(true);
                 });
+
                 btn.setId(tableid);
                 btn.setOnAction(event -> {
-
                                 TableName = tablename;
                                 System.err.println(TableName);
-
                             });
                 stackPane.getChildren().add(btn);
                 buttonlist.add(stackPane);
@@ -355,7 +359,7 @@ public class DashboardController implements Initializable {
         DataObj jdbcDao = new DataObj();
         Connection conn = jdbcDao.getConnection();
         Statement statement = conn.createStatement();
-        String sqlQuery = "SELECT * FROM tbltables;";
+        String sqlQuery = "SELECT * FROM tbltables WHERE tableavail = 1";
         ResultSet resultSet = statement.executeQuery(sqlQuery);
 
         List<StackPane> buttonlist = new ArrayList<>(); //our Collection to hold newly created Buttons
@@ -383,14 +387,16 @@ public class DashboardController implements Initializable {
                     newOrder.setDisable(true);
                     addOrder.setDisable(false);
                     modifyT.setDisable(false);
-
                 });
+
                 btn.setOnAction(event -> {
 
                     TableName = tablename;
+                    getOrderList(tablename);
                     System.err.println(TableName);
 
                 });
+
                 stackPane.getChildren().add(btn);
                 Label label = new Label(tablename);
                 label.setTranslateX(18);
@@ -412,7 +418,7 @@ public class DashboardController implements Initializable {
             tableUsed.setVgap(10);
             tableUsed.getChildren().addAll(buttonlist); //then add all your Buttons that you just created
             scrollpane2.setContent(tableUsed);
-            System.out.println("Pasok Ako: " + resultSet);
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -423,39 +429,63 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public void showProducts() {
-        ObservableList<Products> list = getProductList();
-        itemQuan.setCellValueFactory(new PropertyValueFactory<Products, Integer>("pluID"));
-        itemDesc.setCellValueFactory(new PropertyValueFactory<Products, String>("description"));
-        itemPrice.setCellValueFactory(new PropertyValueFactory<Products, String>("price"));
 
-        itemOrder.setItems(list);
-    }
 
     DataObj jdbc;
+    ObservableList<TempOrder> retrieveOrder = FXCollections.observableArrayList();
+    int ttotalDisplay;
 
-    private ObservableList<Products> getProductList() {
-        ObservableList<Products> productList = FXCollections.observableArrayList();
+    private ObservableList<TempOrder> getOrderList(String tableN) {
 
+        System.out.println("Pasok Ako sa getOrderList");
+        ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
         Connection conn = jdbc.getConnection();
-        String query = "SELECT * FROM products";
+        String query = "SELECT * FROM temporder WHERE tableName='" + tableN + "'";
         Statement st;
         ResultSet rs;
 
         try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
-            Products products;
+            TempOrder temporder;
             while (rs.next()) {
-                products = new Products(rs.getInt("pluID"), rs.getString("barcode"), rs.getString("description"), rs.getString("price"), rs.getString("category"), rs.getBlob("image"), rs.getString("status"));
-                productList.add(products);
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
+                int Total = temporder.getPrice() * temporder.getQuantity();
+                ttotalDisplay = ttotalDisplay + Total ;
+                tempOrderList.add(temporder);
+
+
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
-        return productList;
+        System.out.println("Total: " + ttotalDisplay);
+        retrieveOrder = tempOrderList;
+        totalDisplay.setText("₱ " + ttotalDisplay);
+        displayOrder();
+        return tempOrderList;
     }
-    
-    
+
+
+
+    public void displayOrder() {
+
+        ObservableList<TempOrder> list = retrieveOrder;
+
+
+        itemQuan.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+        itemDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+        itemPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+
+        if (!list.isEmpty()) {
+
+
+            itemOrder.setItems(list);
+            itemOrder.getItems().addAll(list);
+
+            System.out.println("is empty: " +  itemOrder.getItems().addAll(list));
+
+        }
+
+    }
 }

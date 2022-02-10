@@ -11,20 +11,36 @@ package hobbypos.ralphfx.model;
  */
 public class Tables {
     private int id;
+    private int tableavail;
     private String name;
 
-    public Tables(int id, String name) {
+    public Tables(int id, String name , int avail) {
         this.id = id;
         this.name = name;
+        this.tableavail = avail;
     }
 
     public int getId() {
         return id;
     }
 
+    public int getTableavail() {
+        return tableavail;
+    }
+
     public String getName() {
         return name;
     }
-    
-    
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setTableavail(int tableavail) {
+        this.tableavail = tableavail;
+    }
 }

@@ -76,7 +76,7 @@ public class TablesController implements Initializable {
     private void insertRecord(){
         String name = tfTableName.getText();
         if(!name.isEmpty()){
-            String query = "INSERT INTO `tbltables` (name) VALUES('" + name + "')";
+            String query = "INSERT INTO `tbltables` (name,tableavail) VALUES('" + name + "',0)";
             DashboardController dash = new DashboardController();
             executeQuery(query);
             showTable();
@@ -96,7 +96,7 @@ public class TablesController implements Initializable {
          rs = st.executeQuery(query);
          Tables tables;
          while(rs.next()){
-             tables = new Tables(rs.getInt("id"), rs.getString("name"));
+             tables = new Tables(rs.getInt("id"), rs.getString("name"),rs.getInt("tableavail"));
              tableList.add(tables);
          }
      }catch(Exception ex){
