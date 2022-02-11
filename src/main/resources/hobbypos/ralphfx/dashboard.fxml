@@ -64,7 +64,7 @@
                 </TableView>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="addOrder" disable="true" mnemonicParsing="false" onAction="#newOrder" prefHeight="54.0" prefWidth="119.0" style="-fx-background-color: #f0932b;" text="Add Order" textFill="WHITE">
+                  <Button fx:id="addOrder" disable="true" mnemonicParsing="false" onAction="#addtoOrder" prefHeight="54.0" prefWidth="119.0" style="-fx-background-color: #f0932b;" text="Add Order" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>

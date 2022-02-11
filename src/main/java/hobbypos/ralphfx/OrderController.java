@@ -115,7 +115,7 @@ public class OrderController implements Initializable {
 
     TempOrder tempOrder;
     Order newOrder;
-    String transactionids;
+    String transactionids,tranOrderID;
     DataObj jdbc;
 
     ObservableList<TempOrder> finalOrder = FXCollections.observableArrayList();
@@ -135,6 +135,11 @@ public class OrderController implements Initializable {
         }
     }
 
+    public void setTranID(String tranID) {
+        transID.setText(tranID);
+        tranOrderID = tranID;
+        displayTempOrder();
+    }
 
     private void populateWaiterList() {
         Connection conn = jdbc.getConnection();
@@ -183,10 +188,12 @@ public class OrderController implements Initializable {
 
     private void getTransactionID() {
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        LocalDateTime now = LocalDateTime.now();
-        transID.setText(dtf.format(now));
-        transactionids = (dtf.format(now));
+        if(transID.getText().contains("Text")) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+            LocalDateTime now = LocalDateTime.now();
+            transID.setText(dtf.format(now));
+            transactionids = (dtf.format(now));
+        }
     }
 
     @FXML
@@ -268,6 +275,7 @@ public class OrderController implements Initializable {
         }
 
         ttotalDisplay = ttotalDisplay + Total;
+
         return displayOrderList;
     }
 
@@ -323,24 +331,57 @@ public class OrderController implements Initializable {
 
     }
 
-    private ObservableList<TempOrder> getOrderList() {
+
+    public void displayTempOrder() {
+
+        ObservableList<TempOrder> list = getTempOrderList();
+
+        orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+        orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+        orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory( new PropertyValueFactory<TempOrder, Integer>("price"));
+
+        if (list.isEmpty()) {
+            tableOrder.setItems(list);
+            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
+        } else {
+            saveOrdBtn.setDisable(false);
+            tableOrder.getItems().addAll(list);
+            finalOrder.addAll(list);
+            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
+        }
+
+    }
+
+    private ObservableList<TempOrder> getTempOrderList() {
         ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
         Connection conn = jdbc.getConnection();
-        String query = "SELECT * FROM temporder WHERE transactionid=" + Integer.parseInt(transactionids);
+        String query = "SELECT * FROM temporder WHERE transactionid='" + tranOrderID+"'";
         Statement st;
         ResultSet rs;
-
+        int Total=0;
         try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
             TempOrder temporder;
+
             while (rs.next()) {
                 temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
                 tempOrderList.add(temporder);
+                Total = Total + (temporder.getPrice() * temporder.getQuantity());
+                System.err.println("Sakto: " + Total);
+                mywaiterList.getSelectionModel().select(temporder.getWaitername());
+                tableNumtxt.setText(temporder.getTableName());
             }
+            ttotalDisplay = Total;
+            System.err.println("real Total: " + ttotalDisplay);
+
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+
 
         return tempOrderList;
     }

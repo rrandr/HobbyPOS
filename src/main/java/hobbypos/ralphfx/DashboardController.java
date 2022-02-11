@@ -95,6 +95,8 @@ public class DashboardController implements Initializable {
     DataObj jbdc;
     Order orderData;
     String TableName;
+    String WaiterN;
+    String transID;
     /**
      * Initializes the controller class.
      */
@@ -113,6 +115,8 @@ public class DashboardController implements Initializable {
     public void setUsername(String username) {
         lblUsername.setText(username);
     }
+
+
 
     private void setPrimaryStage(Stage pStage) {
         DashboardController.pStage = pStage;
@@ -160,6 +164,26 @@ public class DashboardController implements Initializable {
                         stage.setScene(new Scene(root));
                         stage.show();
                         ((Node) (event.getSource())).getScene().getWindow().hide();
+
+        } catch (Exception ex) {
+            System.out.println("" + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void addtoOrder(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
+            Parent root = fxmlLoader.load();
+            OrderController controller = (OrderController) fxmlLoader.getController();
+            System.err.println(transID);
+            controller.setTranID(transID);
+            Stage stage = new Stage();
+            stage.setTitle("Hobby Bar POS | New Order");
+            stage.setScene(new Scene(root));
+            stage.show();
+            ((Node) (event.getSource())).getScene().getWindow().hide();
 
         } catch (Exception ex) {
             System.out.println("" + ex.getMessage());
@@ -352,8 +376,9 @@ public class DashboardController implements Initializable {
             statement.close();
             conn.close();
         }
-
     }
+
+
 
     private void retrieveTable() throws SQLException {
         DataObj jdbcDao = new DataObj();
@@ -387,10 +412,11 @@ public class DashboardController implements Initializable {
                     newOrder.setDisable(true);
                     addOrder.setDisable(false);
                     modifyT.setDisable(false);
+
                 });
 
                 btn.setOnAction(event -> {
-
+                    getTableData(tablename);
                     TableName = tablename;
                     getOrderList(tablename);
                     System.err.println(TableName);
@@ -404,11 +430,14 @@ public class DashboardController implements Initializable {
                 label.getClass().getResource("style.css");
 
                 stackPane.getChildren().add(label);
-                Label Total = new Label("Total : ₱" + tableid);
+                Label Total = new Label("Waiter : " + getTableData(tablename));
                 Total.setTranslateX(10);
                 Total.setTranslateY(70);
                 stackPane.getChildren().add(Total);
                 buttonlist.add(stackPane);
+
+
+
 
             }
 
@@ -427,13 +456,45 @@ public class DashboardController implements Initializable {
             statement.close();
             conn.close();
         }
+
+        ttotalDisplay=0;
     }
 
 
 
+private String getTableData(String tableName){
+    ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+    Connection conn = jdbc.getConnection();
+    String query = "SELECT * FROM temporder o WHERE o.tableName = '" + tableName + "'";
+    Statement st;
+    ResultSet rs;
+    String waiter = null;
+    int Total=0;
+    try {
+        st = conn.createStatement();
+        rs = st.executeQuery(query);
+        TempOrder temporder;
+
+        while (rs.next()) {
+            temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
+             Total = temporder.getPrice() * temporder.getQuantity();
+
+            tempOrderList.add(temporder);
+            waiter = temporder.getWaitername();
+            transID = temporder.getTransactionid();
+        }
+    } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+    }
+
+    ttotalDisplay = ttotalDisplay + Total ;
+    return waiter;
+}
+
     DataObj jdbc;
     ObservableList<TempOrder> retrieveOrder = FXCollections.observableArrayList();
     int ttotalDisplay;
+    Boolean check;
 
     private ObservableList<TempOrder> getOrderList(String tableN) {
 
@@ -443,17 +504,16 @@ public class DashboardController implements Initializable {
         String query = "SELECT * FROM temporder WHERE tableName='" + tableN + "'";
         Statement st;
         ResultSet rs;
-
+        int Total=0;
         try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
             TempOrder temporder;
             while (rs.next()) {
                 temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
-                int Total = temporder.getPrice() * temporder.getQuantity();
-                ttotalDisplay = ttotalDisplay + Total ;
+                 Total = Total + (temporder.getPrice() * temporder.getQuantity());
                 tempOrderList.add(temporder);
-
+                WaiterN = temporder.getWaitername();
 
             }
         } catch (Exception ex) {
@@ -461,7 +521,8 @@ public class DashboardController implements Initializable {
         }
         System.out.println("Total: " + ttotalDisplay);
         retrieveOrder = tempOrderList;
-        totalDisplay.setText("₱ " + ttotalDisplay);
+        totalDisplay.setText("₱ " + Total);
+
         displayOrder();
         return tempOrderList;
     }
@@ -478,12 +539,7 @@ public class DashboardController implements Initializable {
         itemPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
 
         if (!list.isEmpty()) {
-
-
             itemOrder.setItems(list);
-            itemOrder.getItems().addAll(list);
-
-            System.out.println("is empty: " +  itemOrder.getItems().addAll(list));
 
         }
 
