@@ -1091,7 +1091,7 @@ public class OrderController implements Initializable {
                     temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"),rs.getString("drink"));
                     int total= rs.getInt("quantity") * rs.getInt("price");
                     if(rs.getString("drink").equals("YES")) {
-                        escpos.write(rs.getInt("quantity") + " - " + rs.getString("productname") + " " + rs.getInt("price") + "@each" + "    - P" + total)
+                        escpos.write(rs.getInt("quantity") + " - " + rs.getString("productname") + " " + rs.getInt("price") + "@e" + "    - P" + total)
                                 .feed(1);
                     }
 
@@ -1141,7 +1141,7 @@ public class OrderController implements Initializable {
                     .setFontSize(Style.FontSize._1, Style.FontSize._1)
                     .setBold(true);
 
-            URL _url = this.getClass().getResource("icon2.png");
+            URL _url = this.getClass().getResource("icon3.png");
             BufferedImage imageBufferedImage = ImageIO.read(_url);
             RasterBitImageWrapper imageWrapper = new RasterBitImageWrapper();
             Bitonal algorithm = new BitonalOrderedDither();
@@ -1156,7 +1156,7 @@ public class OrderController implements Initializable {
                     .feed(1)
                     .writeLF(waiterb,"        Waiter: " + waiterName)
                     .feed(2)
-                    .writeLF(totalb,"   Customer Copy")
+                    .writeLF(totalb,"  Customer Copy")
                     .feed(1)
                     .writeLF("--------------------------------")
                     .writeLF(bold,"Transaction no. : " + tranOrderID)
