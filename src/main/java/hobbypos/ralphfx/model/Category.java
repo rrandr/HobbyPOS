@@ -5,7 +5,6 @@
 package hobbypos.ralphfx.model;
 
 /**
- *
  * @author Armero
  */
 public class Category {
@@ -25,6 +24,6 @@ public class Category {
     public String getName() {
         return name;
     }
-    
-    
+
+
 }

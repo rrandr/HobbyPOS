@@ -6,7 +6,6 @@
 package hobbypos.ralphfx.model;
 
 /**
- *
  * @author Admin
  */
 public class Tables {
@@ -14,7 +13,7 @@ public class Tables {
     private int tableavail;
     private String name;
 
-    public Tables(int id, String name , int avail) {
+    public Tables(int id, String name, int avail) {
         this.id = id;
         this.name = name;
         this.tableavail = avail;
@@ -24,23 +23,23 @@ public class Tables {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getTableavail() {
         return tableavail;
+    }
+
+    public void setTableavail(int tableavail) {
+        this.tableavail = tableavail;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setTableavail(int tableavail) {
-        this.tableavail = tableavail;
     }
 }

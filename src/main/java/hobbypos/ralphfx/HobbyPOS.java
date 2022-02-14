@@ -10,9 +10,13 @@ import java.io.IOException;
 
 public class HobbyPOS extends Application {
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        try{
+        try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
             Parent parentRoot = fxmlLoader.load();
@@ -23,16 +27,11 @@ public class HobbyPOS extends Application {
             primaryStage.setScene(new Scene(parentRoot));
             primaryStage.show();
 
-        }
-        catch(IOException ex){
+        } catch (IOException ex) {
             System.err.println(ex.getMessage());
             System.out.println(ex.getCause());
             System.exit(0);
         }
-    }
-
-    public static void main(String[]args){
-        launch(args);
     }
 
 }

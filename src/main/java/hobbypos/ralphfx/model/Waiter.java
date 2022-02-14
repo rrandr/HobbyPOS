@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
- *
  * @author Admin
  */
 public class Waiter {
@@ -17,13 +16,11 @@ public class Waiter {
     private final SimpleStringProperty name;
     private final SimpleStringProperty location;
 
-    public Waiter(int wid, String wname ,String wlocation) {
+    public Waiter(int wid, String wname, String wlocation) {
         this.id = new SimpleIntegerProperty(wid);
         this.name = new SimpleStringProperty(wname);
         this.location = new SimpleStringProperty(wlocation);
     }
-
-
 
 
     public int getId() {

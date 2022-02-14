@@ -5,7 +5,6 @@
 package hobbypos.ralphfx.model;
 
 /**
- *
  * @author Armero
  */
 public class User {
@@ -16,24 +15,23 @@ public class User {
     private String name;
     private String username;
     private String location;
-    
 
-    public User(int usertype, String firstname,String lastname) {
+
+    public User(int usertype, String firstname, String lastname) {
         this.userType = usertype;
         this.firstName = firstname;
         this.lastName = lastname;
     }
 
-  
-    
-    public int getUserType(int usertype){
+
+    public int getUserType(int usertype) {
         return userType;
     }
-    
-    public String userLocation(String loc){
+
+    public String userLocation(String loc) {
         return location;
     }
-    
+
     public int getId() {
         return userID;
     }
@@ -41,5 +39,5 @@ public class User {
     public String getName() {
         return name;
     }
-    
+
 }

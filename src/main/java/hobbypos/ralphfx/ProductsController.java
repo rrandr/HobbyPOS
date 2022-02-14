@@ -4,36 +4,17 @@
  */
 package hobbypos.ralphfx;
 
+import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Products;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -41,8 +22,18 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
 import javax.imageio.ImageIO;
-import hobbypos.ralphfx.modal.DataObj;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.*;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * FXML Controller class
@@ -51,6 +42,11 @@ import hobbypos.ralphfx.modal.DataObj;
  */
 public class ProductsController implements Initializable {
 
+    DataObj jdbc;
+    Scene fxmlFile;
+    Parent root;
+    Stage window;
+    File file;
     @FXML
     private Button btnUpdate;
     @FXML
@@ -78,9 +74,6 @@ public class ProductsController implements Initializable {
     private ComboBox<String> cbStatus;
     @FXML
     private Button btnSave;
-
-     DataObj jdbc;
-    
     @FXML
     private TableColumn<Products, String> colDescription;
     @FXML
@@ -89,17 +82,20 @@ public class ProductsController implements Initializable {
     private TableColumn<Products, String> colCategory;
     @FXML
     private TableColumn<Products, String> colStatus;
-
-    Scene fxmlFile;
-    Parent root;
-    Stage window;
-
-    File file;
-
     @FXML
     private Button btnBrowse;
     @FXML
     private TextField etBarcode;
+
+    public static void showAlert(Alert.AlertType alertType, Window owner, String message, String title) {
+        Alert alert = new Alert(alertType);
+        alert.setContentText(message);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.initOwner(owner);
+        alert.showAndWait();
+    }
 
     /**
      * Initializes the controller class.
@@ -122,38 +118,38 @@ public class ProductsController implements Initializable {
 
     @FXML
     private void editEntry(ActionEvent event) {
-            Connection conn = jdbc.getConnection();
-        try{
+        Connection conn = jdbc.getConnection();
+        try {
             Products product = tableProducts.getSelectionModel().getSelectedItem();
             String query = "UPDATE products SET description = '" + etDescription.getText() + "', "
-                    + "price = '" + etPrice.getText() +"', category = '" + 
-                    cbCategories.getSelectionModel().getSelectedItem() + "', status = '" + cbStatus.getSelectionModel().getSelectedItem() + 
+                    + "price = '" + etPrice.getText() + "', category = '" +
+                    cbCategories.getSelectionModel().getSelectedItem() + "', status = '" + cbStatus.getSelectionModel().getSelectedItem() +
                     "' WHERE pluID = '" + product.getId() + "'";
             executeQuery(query);
             showProducts();
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
     @FXML
     private void deleteEntry(ActionEvent event) {
-           Connection conn = jdbc.getConnection();
-        try{
+        Connection conn = jdbc.getConnection();
+        try {
             Products product = tableProducts.getSelectionModel().getSelectedItem();
             String query = "DELETE FROM products WHERE pluID = '" + product.getId() + "'";
             executeQuery(query);
             showProducts();
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
     public void showProducts() {
         ObservableList<Products> list = getProductList();
-        colId.setCellValueFactory(new PropertyValueFactory<Products, Integer >("id"));
+        colId.setCellValueFactory(new PropertyValueFactory<Products, Integer>("id"));
         colDescription.setCellValueFactory(new PropertyValueFactory<Products, String>("description"));
         colPrice.setCellValueFactory(new PropertyValueFactory<Products, String>("price"));
         colCategory.setCellValueFactory(new PropertyValueFactory<Products, String>("category"));
@@ -168,7 +164,7 @@ public class ProductsController implements Initializable {
 //            String query = "INSERT INTO `tbltables` (name) VALUES('" + name + "')";
 //            executeQuery(query);
 //            showProducts();
-//           
+//
 //        }
     }
 
@@ -260,28 +256,28 @@ public class ProductsController implements Initializable {
                 btnSave.setDisable(true);
                 btnUpdate.setDisable(false);
                 btnDelete.setDisable(false);
-//                tfCategoryName.setText(newSelection.getName());                
+//                tfCategoryName.setText(newSelection.getName());
                 etId.setText(Integer.toString(newSelection.getId()));
                 etBarcode.setText(newSelection.getBarcode());
                 etDescription.setText(newSelection.getDescription());
                 etPrice.setText(newSelection.getPrice());
-          
-              
-                java.sql.Blob blob;  
+
+
+                java.sql.Blob blob;
                 try {
-                    blob =    newSelection.getImage();
-                     InputStream in = blob.getBinaryStream();  
+                    blob = newSelection.getImage();
+                    InputStream in = blob.getBinaryStream();
                     BufferedImage images = ImageIO.read(in);
                     Image image = javafx.embed.swing.SwingFXUtils.toFXImage(images, null);
-                     ivProduct.setImage(image);
-                     
+                    ivProduct.setImage(image);
+
                 } catch (SQLException ex) {
                     Logger.getLogger(ProductsController.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
                     Logger.getLogger(ProductsController.class.getName()).log(Level.SEVERE, null, ex);
                 }
-               
-                
+
+
                 cbCategories.getSelectionModel().select(newSelection.getCategory());
                 cbStatus.getSelectionModel().select(newSelection.getStatus());
 //                cbWeight.getSelectionModel().select(newSelection.get);
@@ -291,7 +287,7 @@ public class ProductsController implements Initializable {
                 etPrice.setText("");
                 cbCategories.getSelectionModel().selectFirst();
                 cbStatus.getSelectionModel().selectFirst();
-                
+
                 btnSave.setDisable(false);
                 btnUpdate.setDisable(true);
                 btnDelete.setDisable(true);
@@ -375,16 +371,5 @@ public class ProductsController implements Initializable {
         }
     }
 
-    public static void showAlert(Alert.AlertType alertType, Window owner, String message, String title) {
-        Alert alert = new Alert(alertType);
-        alert.setContentText(message);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.initModality(Modality.APPLICATION_MODAL);
-        alert.initOwner(owner);
-        alert.showAndWait();
-    }
 
-    
-    
 }

@@ -4,21 +4,8 @@
  */
 package hobbypos.ralphfx;
 
+import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Order;
-import hobbypos.ralphfx.model.Products;
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import hobbypos.ralphfx.model.TempOrder;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,7 +27,19 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import hobbypos.ralphfx.modal.DataObj;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * FXML Controller class
@@ -49,6 +48,19 @@ import hobbypos.ralphfx.modal.DataObj;
  */
 public class DashboardController implements Initializable {
 
+    private static Stage pStage;
+    Scene fxmlFile;
+    Parent root;
+    Stage window;
+    DataObj jbdc;
+    Order orderData;
+    String TableName;
+    String WaiterN;
+    String transID;
+    DataObj jdbc;
+    ObservableList<TempOrder> retrieveOrder = FXCollections.observableArrayList();
+    int ttotalDisplay;
+    Boolean check;
     @FXML
     private Label lblUsername;
     @FXML
@@ -58,45 +70,36 @@ public class DashboardController implements Initializable {
     @FXML
     private Button addOrder;
     @FXML
-    private Button modifyT;
-
-    Scene fxmlFile;
-    Parent root;
-    Stage window;
-
-    private static Stage pStage;
+    private Button checkoutBtn;
     @FXML
     private Button btnLookup;
     @FXML
     private TilePane availTable;
     @FXML
     private TilePane tableUsed;
-
     @FXML
     private TableColumn<TempOrder, Integer> itemQuan;
-
     @FXML
     private TableColumn<TempOrder, String> itemDesc;
-
     @FXML
     private TableColumn<TempOrder, Integer> itemPrice;
-
     @FXML
-    private  ScrollPane scrollpane1;
-
+    private ScrollPane scrollpane1;
     @FXML
-    private  ScrollPane scrollpane2;
-
+    private ScrollPane scrollpane2;
     @FXML
     private Label totalDisplay;
-
     @FXML
     private TableView<TempOrder> itemOrder;
-    DataObj jbdc;
-    Order orderData;
-    String TableName;
-    String WaiterN;
-    String transID;
+
+    public static Stage getPrimaryStage() {
+        return pStage;
+    }
+
+    private void setPrimaryStage(Stage pStage) {
+        DashboardController.pStage = pStage;
+    }
+
     /**
      * Initializes the controller class.
      */
@@ -114,16 +117,6 @@ public class DashboardController implements Initializable {
 
     public void setUsername(String username) {
         lblUsername.setText(username);
-    }
-
-
-
-    private void setPrimaryStage(Stage pStage) {
-        DashboardController.pStage = pStage;
-    }
-
-    public static Stage getPrimaryStage() {
-        return pStage;
     }
 
     @FXML
@@ -147,7 +140,7 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    public void orderProp(ActionEvent event){
+    public void orderProp(ActionEvent event) {
         newOrder.setDisable(true);
         addOrder.setDisable(true);
     }
@@ -155,15 +148,15 @@ public class DashboardController implements Initializable {
     @FXML
     private void newOrder(ActionEvent event) {
         try {
-                   FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
-                        Parent root = fxmlLoader.load();
-                        OrderController controller = (OrderController) fxmlLoader.getController();
-                        controller.setUsername(TableName);
-                        Stage stage = new Stage();
-                        stage.setTitle("Hobby Bar POS | New Order");
-                        stage.setScene(new Scene(root));
-                        stage.show();
-                        ((Node) (event.getSource())).getScene().getWindow().hide();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
+            Parent root = fxmlLoader.load();
+            OrderController controller = (OrderController) fxmlLoader.getController();
+            controller.setUsername(TableName);
+            Stage stage = new Stage();
+            stage.setTitle("Hobby Bar POS | New Order");
+            stage.setScene(new Scene(root));
+            stage.show();
+            ((Node) (event.getSource())).getScene().getWindow().hide();
 
         } catch (Exception ex) {
             System.out.println("" + ex.getMessage());
@@ -245,6 +238,15 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
+    private void actionPrint(ActionEvent event) {
+        try {
+            openModalWindow("Receipt.fxml", "print");
+        } catch (Exception ex) {
+
+        }
+    }
+
+    @FXML
     private void handleKeyPressed(KeyEvent event) {
         System.out.println("Key pressed: " + event.getCode());
         switch (event.getCode()) {
@@ -259,6 +261,12 @@ public class DashboardController implements Initializable {
                 break;
             case F2:
                 System.out.println("Payment Triggered.");
+                try {
+                    openModalWindow("Receipt.fxml", "Manage Products");
+                } catch (Exception ex) {
+                    System.out.println("" + ex.getMessage());
+                    ex.printStackTrace();
+                }
                 break;
             case F3:
                 System.out.println("Cancel order.");
@@ -286,12 +294,12 @@ public class DashboardController implements Initializable {
                 break;
             case F7:
                 try {
-                openModalWindow("Lookup.fxml", "Product Lookup");
-            } catch (Exception ex) {
-                System.out.println("" + ex.getMessage());
-                ex.printStackTrace();
-            }
-            break;
+                    openModalWindow("Lookup.fxml", "Product Lookup");
+                } catch (Exception ex) {
+                    System.out.println("" + ex.getMessage());
+                    ex.printStackTrace();
+                }
+                break;
             case F8:
                 System.out.println("Logout.");
                 try {
@@ -325,7 +333,6 @@ public class DashboardController implements Initializable {
         }
     }
 
-
     private void seeAvailableTable() throws SQLException {
 
         DataObj jdbcDao = new DataObj();
@@ -346,15 +353,15 @@ public class DashboardController implements Initializable {
                 btn.setPrefSize(150, 40);
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(false);
-                    modifyT.setDisable(true);
+                    checkoutBtn.setDisable(true);
                     addOrder.setDisable(true);
                 });
 
                 btn.setId(tableid);
                 btn.setOnAction(event -> {
-                                TableName = tablename;
-                                System.err.println(TableName);
-                            });
+                    TableName = tablename;
+                    System.err.println(TableName);
+                });
                 stackPane.getChildren().add(btn);
                 buttonlist.add(stackPane);
             }
@@ -377,8 +384,6 @@ public class DashboardController implements Initializable {
             conn.close();
         }
     }
-
-
 
     private void retrieveTable() throws SQLException {
         DataObj jdbcDao = new DataObj();
@@ -411,7 +416,7 @@ public class DashboardController implements Initializable {
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(true);
                     addOrder.setDisable(false);
-                    modifyT.setDisable(false);
+                    checkoutBtn.setDisable(false);
 
                 });
 
@@ -437,8 +442,6 @@ public class DashboardController implements Initializable {
                 buttonlist.add(stackPane);
 
 
-
-
             }
 
             tableUsed.getChildren().clear(); //remove all Buttons that are currently in the container
@@ -457,44 +460,48 @@ public class DashboardController implements Initializable {
             conn.close();
         }
 
-        ttotalDisplay=0;
+        ttotalDisplay = 0;
     }
 
-
-
-private String getTableData(String tableName){
-    ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
-    Connection conn = jdbc.getConnection();
-    String query = "SELECT * FROM temporder o WHERE o.tableName = '" + tableName + "'";
-    Statement st;
-    ResultSet rs;
-    String waiter = null;
-    int Total=0;
-    try {
-        st = conn.createStatement();
-        rs = st.executeQuery(query);
-        TempOrder temporder;
-
-        while (rs.next()) {
-            temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
-             Total = temporder.getPrice() * temporder.getQuantity();
-
-            tempOrderList.add(temporder);
-            waiter = temporder.getWaitername();
-            transID = temporder.getTransactionid();
+    @FXML
+    private void setupPrinter() {
+        try {
+            openModalWindow("printer.fxml", "Setup Printer");
+        } catch (Exception ex) {
+            System.out.println("" + ex.getMessage());
+            ex.printStackTrace();
         }
-    } catch (Exception ex) {
-        System.out.println(ex.getMessage());
+
     }
 
-    ttotalDisplay = ttotalDisplay + Total ;
-    return waiter;
-}
+    private String getTableData(String tableName) {
+        ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+        Connection conn = jdbc.getConnection();
+        String query = "SELECT * FROM temporder o WHERE o.tableName = '" + tableName + "'";
+        Statement st;
+        ResultSet rs;
+        String waiter = null;
+        int Total = 0;
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            TempOrder temporder;
 
-    DataObj jdbc;
-    ObservableList<TempOrder> retrieveOrder = FXCollections.observableArrayList();
-    int ttotalDisplay;
-    Boolean check;
+            while (rs.next()) {
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                Total = temporder.getPrice() * temporder.getQuantity();
+
+                tempOrderList.add(temporder);
+                waiter = temporder.getWaitername();
+                transID = temporder.getTransactionid();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        ttotalDisplay = ttotalDisplay + Total;
+        return waiter;
+    }
 
     private ObservableList<TempOrder> getOrderList(String tableN) {
 
@@ -504,14 +511,14 @@ private String getTableData(String tableName){
         String query = "SELECT * FROM temporder WHERE tableName='" + tableN + "'";
         Statement st;
         ResultSet rs;
-        int Total=0;
+        int Total = 0;
         try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
             TempOrder temporder;
             while (rs.next()) {
-                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"));
-                 Total = Total + (temporder.getPrice() * temporder.getQuantity());
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                Total = Total + (temporder.getPrice() * temporder.getQuantity());
                 tempOrderList.add(temporder);
                 WaiterN = temporder.getWaitername();
 
@@ -526,7 +533,6 @@ private String getTableData(String tableName){
         displayOrder();
         return tempOrderList;
     }
-
 
 
     public void displayOrder() {

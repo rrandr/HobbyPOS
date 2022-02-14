@@ -17,13 +17,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="800.0" prefWidth="1300.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hobbypos.ralphfx.DashboardController">
+<BorderPane onKeyPressed="#handleKeyPressed" prefHeight="800.0" prefWidth="1300.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hobbypos.ralphfx.DashboardController">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" onAction="#setupPrinter" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem mnemonicParsing="false" text="Printer Setup" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -62,26 +62,26 @@
                         <TableColumn fx:id="itemPrice" minWidth="-Infinity" text="Price" />
                     </columns>
                 </TableView>
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Button fx:id="addOrder" disable="true" mnemonicParsing="false" onAction="#addtoOrder" prefHeight="54.0" prefWidth="119.0" style="-fx-background-color: #f0932b;" text="Add Order" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets left="11.0" right="15.0" top="10.0" />
-                     </HBox.margin>
-                  </Button>
-                  <Button fx:id="modifyT" disable="true" mnemonicParsing="false" prefHeight="54.0" prefWidth="113.0" style="-fx-background-color: #f0932b;" text="Modify Table" textAlignment="RIGHT" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets top="10.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Button fx:id="addOrder" disable="true" mnemonicParsing="false" onAction="#addtoOrder" prefHeight="54.0" prefWidth="119.0" style="-fx-background-color: #f0932b;" text="Add Order" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="11.0" right="15.0" top="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button fx:id="checkoutBtn" disable="true" mnemonicParsing="false" prefHeight="54.0" prefWidth="113.0" style="-fx-background-color: #f0932b;" text="CheckOut" textAlignment="RIGHT" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets top="10.0" />
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                </HBox>
             </children>
         </VBox>
     </right>
@@ -93,7 +93,7 @@
                         <Font name="System Bold" size="12.0" />
                     </font>
                 </Button>
-                <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F2 - Payment]" textFill="WHITE">
+                <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#actionPrint" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F2 - Payment]" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>
@@ -136,31 +136,32 @@
     </bottom>
     <left>
         <VBox prefHeight="610.0" prefWidth="186.0" style="-fx-background-color: #252225;" BorderPane.alignment="CENTER">
-         <children>
-            <ScrollPane fx:id="scrollpane1" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" pannable="true" prefWidth="186.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
-                     <children>
-                        <TilePane fx:id="availTable" layoutY="92.0" prefHeight="609.0" prefWidth="186.0" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </ScrollPane>
-         </children></VBox>
+            <children>
+                <ScrollPane fx:id="scrollpane1" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" pannable="true" prefWidth="186.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                            <children>
+                                <TilePane fx:id="availTable" layoutY="92.0" prefHeight="609.0" prefWidth="186.0" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
     </left>
-   <center>
-      <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="614.0" prefWidth="827.0" BorderPane.alignment="CENTER">
-         <children>
-            <ScrollPane fx:id="scrollpane2" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" HBox.hgrow="ALWAYS">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
-                     <children>
-                        <TilePane fx:id="tableUsed" prefHeight="595.0" prefWidth="812.0" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </ScrollPane>
-         </children>
-      </HBox>
-   </center>
+    <center>
+        <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="614.0" prefWidth="827.0" BorderPane.alignment="CENTER">
+            <children>
+                <ScrollPane fx:id="scrollpane2" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" HBox.hgrow="ALWAYS">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                            <children>
+                                <TilePane fx:id="tableUsed" prefHeight="595.0" prefWidth="812.0" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </ScrollPane>
+            </children>
+        </HBox>
+    </center>
 </BorderPane>

@@ -5,10 +5,11 @@
 package hobbypos.ralphfx.model;
 
 /**
- *
  * @author Armero
  */
+
 import java.sql.Blob;
+
 /**
  *
  * @author Admin
@@ -35,8 +36,8 @@ public class Products {
     public Integer getId() {
         return this.pluID;
     }
-    
-    public String getBarcode(){
+
+    public String getBarcode() {
         return barcode;
     }
 
@@ -59,6 +60,6 @@ public class Products {
     public String getStatus() {
         return status;
     }
-    
-    
+
+
 }

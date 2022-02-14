@@ -4,12 +4,8 @@
  */
 package hobbypos.ralphfx;
 
+import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Category;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,7 +16,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import hobbypos.ralphfx.modal.DataObj;
+
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ResourceBundle;
 
 /**
  * FXML Controller class
@@ -29,6 +30,7 @@ import hobbypos.ralphfx.modal.DataObj;
  */
 public class CategoryController implements Initializable {
 
+    DataObj jdbc;
     @FXML
     private TextField tfCategoryName;
     @FXML
@@ -44,7 +46,6 @@ public class CategoryController implements Initializable {
     @FXML
     private TableColumn<Category, String> colName;
 
-    DataObj jdbc;
     /**
      * Initializes the controller class.
      */
@@ -54,100 +55,102 @@ public class CategoryController implements Initializable {
         addListenerForTable();
         jdbc = new DataObj();
         showCategories();
-    }    
-   
-    public void showCategories(){
+    }
+
+    public void showCategories() {
         ObservableList<Category> list = getCategoryList();
         colId.setCellValueFactory(new PropertyValueFactory<Category, Integer>("id"));
-        colName.setCellValueFactory(new PropertyValueFactory<Category, String>("name"));        
-        
-        
+        colName.setCellValueFactory(new PropertyValueFactory<Category, String>("name"));
+
+
         tableCategory.setItems(list);
     }
-    
-     private ObservableList<Category> getCategoryList() {
-     ObservableList<Category> categoryList = FXCollections.observableArrayList();
-     Connection conn = jdbc.getConnection();
-     String query = "SELECT * FROM categories";
-     Statement st;
-     ResultSet rs;
-     
-     try{
-         st = conn.createStatement();
-         rs = st.executeQuery(query);
-         Category category;
-         while(rs.next()){
-             category = new Category(rs.getInt("id"), rs.getString("name"));
-             categoryList.add(category);
-         }
-     }catch(Exception ex){
-         System.out.println(ex.getMessage());
-     }
-     
-     return categoryList;
+
+    private ObservableList<Category> getCategoryList() {
+        ObservableList<Category> categoryList = FXCollections.observableArrayList();
+        Connection conn = jdbc.getConnection();
+        String query = "SELECT * FROM categories";
+        Statement st;
+        ResultSet rs;
+
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            Category category;
+            while (rs.next()) {
+                category = new Category(rs.getInt("id"), rs.getString("name"));
+                categoryList.add(category);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return categoryList;
     }
-     
-       private void addListenerForTable(){
-        tableCategory.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) -> {
-            if(newSelection != null){
+
+    private void addListenerForTable() {
+        tableCategory.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
                 btnUpdate.setDisable(false);
-                btnDelete.setDisable(false);                
-                tfCategoryName.setText(newSelection.getName());                
-            }else{
+                btnDelete.setDisable(false);
+                tfCategoryName.setText(newSelection.getName());
+            } else {
                 tfCategoryName.setText("");
                 btnUpdate.setDisable(true);
                 btnDelete.setDisable(true);
             }
         });
     }
-       
-    private void insertRecord(){
+
+    private void insertRecord() {
         String name = tfCategoryName.getText();
-        if(!name.isEmpty()){
+        if (!name.isEmpty()) {
             String query = "INSERT INTO `categories` (name) VALUES('" + name + "')";
-             System.out.println(query);
+            System.out.println(query);
             executeQuery(query);
             showCategories();
             tfCategoryName.setText("");
         }
     }
-    
-     private void executeQuery(String query) {
-   
+
+    private void executeQuery(String query) {
+
         Connection conn = jdbc.getConnection();
         Statement st;
         System.out.println(query);
-        try{
+        try {
             st = conn.createStatement();
             st.executeUpdate(query);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println("error while inserting record.");
             ex.printStackTrace();
-        } 
+        }
     }
+
     @FXML
     private void editEntry(ActionEvent event) {
         Connection conn = jdbc.getConnection();
-        try{
+        try {
             Category category = tableCategory.getSelectionModel().getSelectedItem();
             String query = "UPDATE categories SET name = '" + tfCategoryName.getText() + " ' WHERE id = '" + category.getId() + "'";
             executeQuery(query);
             showCategories();
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
+
     @FXML
     private void deleteEntry(ActionEvent event) {
-         Connection conn = jdbc.getConnection();
-        try{
+        Connection conn = jdbc.getConnection();
+        try {
             Category category = tableCategory.getSelectionModel().getSelectedItem();
             String query = "DELETE FROM categories WHERE id = '" + category.getId() + "'";
             executeQuery(query);
             showCategories();
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
@@ -155,8 +158,8 @@ public class CategoryController implements Initializable {
     @FXML
     private void saveCategory(ActionEvent event) {
         insertRecord();
-        
-       
+
+
     }
-    
+
 }

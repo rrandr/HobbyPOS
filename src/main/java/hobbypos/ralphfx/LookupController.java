@@ -4,12 +4,8 @@
  */
 package hobbypos.ralphfx;
 
+import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Products;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,7 +13,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import hobbypos.ralphfx.modal.DataObj;
+
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ResourceBundle;
 
 /**
  * FXML Controller class
@@ -26,8 +27,9 @@ import hobbypos.ralphfx.modal.DataObj;
  */
 
 
-  public class LookupController implements Initializable {
+public class LookupController implements Initializable {
 
+    DataObj jdbc;
     @FXML
     private TableView<Products> tableProducts;
     @FXML
@@ -40,9 +42,6 @@ import hobbypos.ralphfx.modal.DataObj;
     private TableColumn<Products, String> colCategory;
     @FXML
     private TableColumn<Products, String> colStatus;
-    
-    
-    DataObj jdbc;
 
     /**
      * Initializes the controller class.
@@ -86,5 +85,5 @@ import hobbypos.ralphfx.modal.DataObj;
 
         return productList;
     }
-    
+
 }

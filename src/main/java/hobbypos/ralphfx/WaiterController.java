@@ -4,28 +4,25 @@
  */
 package hobbypos.ralphfx;
 
-import hobbypos.ralphfx.model.Tables;
-import java.net.URL;
-import java.sql.SQLException;
-import java.util.ResourceBundle;
-
+import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Waiter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import javafx.event.ActionEvent;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
-import hobbypos.ralphfx.modal.DataObj;
+
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ResourceBundle;
+
 /**
  * FXML Controller class
  *
@@ -33,6 +30,7 @@ import hobbypos.ralphfx.modal.DataObj;
  */
 public class WaiterController implements Initializable {
 
+    DataObj jdbc;
     @FXML
     private TextField tfTableName;
     @FXML
@@ -43,21 +41,16 @@ public class WaiterController implements Initializable {
     private Button btnDelete;
     @FXML
     private Button btnAssign;
-
     @FXML
     private TableView<Waiter> tvTables;
-
     @FXML
     private TableColumn<Waiter, Integer> colId;
     @FXML
     private TableColumn<Waiter, String> colName;
     @FXML
-    private  TableColumn<Waiter,String> colLocation;
-
-    DataObj jdbc;
-
-
+    private TableColumn<Waiter, String> colLocation;
     private ObservableList<Waiter> waiterList;
+
     /**
      * Initializes the controller class.
      */
@@ -73,7 +66,7 @@ public class WaiterController implements Initializable {
     }
 
     @FXML
-    public void showWaiter(){
+    public void showWaiter() {
 
         ObservableList<Waiter> list = getWaiterList();
         colId.setCellValueFactory(new PropertyValueFactory<Waiter, Integer>("id"));
@@ -81,12 +74,12 @@ public class WaiterController implements Initializable {
         colLocation.setCellValueFactory(new PropertyValueFactory<Waiter, String>("location"));
         tvTables.setItems(list);
 
-        System.out.println("pasok"+ tvTables);
+        System.out.println("pasok" + tvTables);
     }
 
-    private void insertRecord(){
+    private void insertRecord() {
         String name = tfTableName.getText();
-        if(!name.isEmpty()){
+        if (!name.isEmpty()) {
             String query = "INSERT INTO `waiter` (name,location) VALUES('" + name + "','1')";
             DashboardController dash = new DashboardController();
             executeQuery(query);
@@ -103,15 +96,15 @@ public class WaiterController implements Initializable {
         Statement st;
         ResultSet rs;
 
-        try{
+        try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
             Waiter waiter;
-            while(rs.next()){
-                waiter = new Waiter(rs.getInt("waiterID"), rs.getString("name"),rs.getString("location"));
+            while (rs.next()) {
+                waiter = new Waiter(rs.getInt("waiterID"), rs.getString("name"), rs.getString("location"));
                 waiterList.add(waiter);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
         System.out.println(waiterList);
@@ -122,10 +115,10 @@ public class WaiterController implements Initializable {
         Connection conn = jdbc.getConnection();
         Statement st;
         System.out.println(query);
-        try{
+        try {
             st = conn.createStatement();
             st.executeUpdate(query);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println("error while inserting record.");
             ex.printStackTrace();
         }
@@ -136,14 +129,14 @@ public class WaiterController implements Initializable {
         insertRecord();
     }
 
-    private void addListenerForTable(){
-        tvTables.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) -> {
-            if(newSelection != null){
+    private void addListenerForTable() {
+        tvTables.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
                 btnUpdate.setDisable(false);
                 btnDelete.setDisable(false);
                 tfTableName.setText(newSelection.getName());
 
-            }else{
+            } else {
                 tfTableName.setText("");
                 btnUpdate.setDisable(true);
                 btnDelete.setDisable(true);
@@ -155,32 +148,30 @@ public class WaiterController implements Initializable {
     @FXML
     private void editEntry(ActionEvent event) {
         Connection conn = jdbc.getConnection();
-        try{
+        try {
             Waiter waiter = tvTables.getSelectionModel().getSelectedItem();
             String query = "UPDATE waiter SET name = '" + tfTableName.getText() + " ' WHERE waiterid = '" + waiter.getId() + "'";
             executeQuery(query);
             showWaiter();
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
 
 
     }
 
 
-
     @FXML
     private void deleteEntry(ActionEvent event) {
         Connection conn = jdbc.getConnection();
-        try{
+        try {
             Waiter waiter = tvTables.getSelectionModel().getSelectedItem();
             String query = "DELETE FROM waiter WHERE waiterid = '" + waiter.getId() + "'";
             executeQuery(query);
             showWaiter();
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }

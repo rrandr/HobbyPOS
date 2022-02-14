@@ -48,6 +48,11 @@ import java.util.ResourceBundle;
 public class LoginController implements Initializable {
 
 
+    public boolean focus;
+    public boolean sfocus;
+    public Integer userid;
+    public String lasttouch;
+    public String name;
     @FXML
     private Label dateData;
     @FXML
@@ -81,11 +86,29 @@ public class LoginController implements Initializable {
     @FXML
     private Button backs;
 
-    public boolean focus;
-    public boolean sfocus;
-    public Integer userid;
-    public String lasttouch;
-    public String name;
+    public static String removeLastCharOptional(String s) {
+        return Optional.ofNullable(s)
+                .filter(str -> str.length() != 0)
+                .map(str -> str.substring(0, str.length() - 1))
+                .orElse(s);
+    }
+
+    public static void infoBox(String infoMessage, String headerText, String title) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setContentText(infoMessage);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.showAndWait();
+    }
+
+    public static void showAlert(Alert.AlertType alertType, Window owner, String message, String title) {
+        Alert alert = new Alert(alertType);
+        alert.setContentText(message);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.initOwner(owner);
+        alert.show();
+    }
 
     /**
      * Initializes the controller class.
@@ -98,7 +121,6 @@ public class LoginController implements Initializable {
         init();
 
     }
-
 
     public void init() {
 
@@ -173,7 +195,6 @@ public class LoginController implements Initializable {
 
     }
 
-
     public void inputData(ActionEvent event) {
 
 
@@ -201,13 +222,6 @@ public class LoginController implements Initializable {
             }
         }
 
-    }
-
-    public static String removeLastCharOptional(String s) {
-        return Optional.ofNullable(s)
-                .filter(str -> str.length() != 0)
-                .map(str -> str.substring(0, str.length() - 1))
-                .orElse(s);
     }
 
     public void actionLogin(ActionEvent event) {
@@ -256,7 +270,6 @@ public class LoginController implements Initializable {
         }
     }
 
-
     private ObservableList<User> getUserInfo(int userID) {
         DataObj jdbcDao = new DataObj();
         ObservableList<User> UserList = FXCollections.observableArrayList();
@@ -278,24 +291,6 @@ public class LoginController implements Initializable {
         }
 
         return UserList;
-    }
-
-
-    public static void infoBox(String infoMessage, String headerText, String title) {
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setContentText(infoMessage);
-        alert.setTitle(title);
-        alert.setHeaderText(headerText);
-        alert.showAndWait();
-    }
-
-    public static void showAlert(Alert.AlertType alertType, Window owner, String message, String title) {
-        Alert alert = new Alert(alertType);
-        alert.setContentText(message);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.initOwner(owner);
-        alert.show();
     }
 
 
