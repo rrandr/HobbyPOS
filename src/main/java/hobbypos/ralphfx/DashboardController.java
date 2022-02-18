@@ -151,6 +151,7 @@ public class DashboardController implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Order.fxml"));
             Parent root = fxmlLoader.load();
             OrderController controller = (OrderController) fxmlLoader.getController();
+            System.err.println(" newOrder : "+TableName);
             controller.setUsername(TableName);
             Stage stage = new Stage();
             stage.setTitle("Hobby Bar POS | New Order");

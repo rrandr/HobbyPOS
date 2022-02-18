@@ -70,8 +70,8 @@ public class PrinterController implements Initializable {
         String kitchen = kCombo.getSelectionModel().getSelectedItem().toString();;
         String ktv = ktvCombo.getSelectionModel().getSelectedItem().toString();;
 
-        insert(bar,"BAR");
-        insert(drink, "DRINK");
+        insert(bar,"CASHIER");
+        insert(drink, "BAR");
         insert(kitchen, "KITCHEN");
         insert(ktv,"KTV");
 
