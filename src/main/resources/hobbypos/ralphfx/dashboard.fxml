@@ -62,7 +62,7 @@
                         <TableColumn fx:id="itemPrice" minWidth="-Infinity" text="Price" />
                     </columns>
                 </TableView>
-                <HBox prefHeight="100.0" prefWidth="200.0">
+                <HBox prefHeight="77.0" prefWidth="268.0">
                     <children>
                         <Button fx:id="addOrder" disable="true" mnemonicParsing="false" onAction="#addtoOrder" prefHeight="54.0" prefWidth="119.0" style="-fx-background-color: #f0932b;" text="Edit Order" textFill="WHITE">
                             <font>
@@ -72,7 +72,7 @@
                                 <Insets left="11.0" right="15.0" top="10.0" />
                             </HBox.margin>
                         </Button>
-                        <Button fx:id="checkoutBtn" disable="true" mnemonicParsing="false" prefHeight="54.0" prefWidth="113.0" style="-fx-background-color: #f0932b;" text="CheckOut" textAlignment="RIGHT" textFill="WHITE">
+                        <Button fx:id="printBtn" disable="true" mnemonicParsing="false" onAction="#getBill" prefHeight="54.0" prefWidth="113.0" style="-fx-background-color: #f0932b;" text="Print Bill" textAlignment="RIGHT" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
@@ -82,6 +82,14 @@
                         </Button>
                     </children>
                 </HBox>
+            <Button fx:id="checkoutBtn" disable="true" mnemonicParsing="false" onAction="#payBill" prefHeight="63.0" prefWidth="268.0" style="-fx-background-color: #f0932b;" text="Pay Bill" textAlignment="RIGHT" textFill="WHITE" VBox.vgrow="ALWAYS">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Button>
             </children>
         </VBox>
     </right>
@@ -93,7 +101,7 @@
                         <Font name="System Bold" size="12.0" />
                     </font>
                 </Button>
-                <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#actionPrint" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F2 - Payment]" textFill="WHITE">
+                <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#actionPrint" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F2 ]" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>

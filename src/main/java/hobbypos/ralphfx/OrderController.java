@@ -7,7 +7,6 @@ package hobbypos.ralphfx;
 import com.github.anastaciocintra.escpos.EscPos;
 import com.github.anastaciocintra.escpos.EscPosConst;
 import com.github.anastaciocintra.escpos.Style;
-import com.github.anastaciocintra.escpos.image.*;
 import com.github.anastaciocintra.output.PrinterOutputStream;
 import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Order;
@@ -37,9 +36,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import javax.print.*;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.PrintException;
+import javax.print.PrintService;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,6 +106,8 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
     @FXML
     private Button saveOrdBtn;
     @FXML
+    private Button updateOrdBtn;
+    @FXML
     private TextField oQuantity;
     @FXML
     private TableView<TempOrder> tableOrder;
@@ -124,6 +124,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     int drinkCheck;
     int newDrinkChecker;
+    int newFoodChecker;
     int removeChecker;
 
     @Override
@@ -251,8 +252,49 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
                 insertRecord();
 
+                sendDrink();
+                sendKitchen();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
+                Parent root = fxmlLoader.load();
 
-                //sendKitchen();
+                Stage stage = new Stage();
+                stage.setTitle("Hobby Bar POS | Dashboard");
+                stage.setScene(new Scene(root));
+                stage.show();
+                ((Node) (event.getSource())).getScene().getWindow().hide();
+
+
+            } else if (option.get() == ButtonType.CANCEL) {
+
+
+            }
+
+
+        } catch (Exception ex) {
+            System.out.println("" + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private void UpdateOrderDB(ActionEvent event) {
+
+        try {
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Order");
+            alert.setHeaderText("Confirm Order?");
+            System.err.println("New Order List Sizke: " + addNewOrdersList.size() + "removeChecker: " + removeChecker + "newDrink Checker: " + newDrinkChecker);
+
+
+            // option != null.
+            Optional<ButtonType> option = alert.showAndWait();
+
+            if (option.get() == ButtonType.OK) {
+
+
+                insertRecord();
+                sendKitchen();
+
                 //officialreceipt();
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
                 Parent root = fxmlLoader.load();
@@ -265,6 +307,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
 
             } else if (option.get() == ButtonType.CANCEL) {
+
 
             }
 
@@ -284,16 +327,30 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         ObservableList<String> list = FXCollections.observableArrayList();
         System.err.println("Awa ragud ni : " + tranOrderID);
         try {
-            if (!tranOrderID.isEmpty()) {
-                ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid='" + tranOrderID + "'");
 
-                System.err.println("ari ko sulod :  " + tranOrderID);
+
+                SaveOrderDB(event);
+
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
+
+    }
+    @FXML
+    private void updateOrder(ActionEvent event) throws PrintException, IOException {
+
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        //System.out.println(query);
+        ObservableList<String> list = FXCollections.observableArrayList();
+        System.err.println("Awa ragud ni : " + tranOrderID);
+        try {
+
+                ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid='" + tranOrderID + "'");
                 deleteEntry();
-                SaveOrderDB(event);
-            } else {
-                System.err.println("diri ko sulod :  " + transactionids);
-                SaveOrderDB(event);
-            }
+            UpdateOrderDB(event);
+
         } catch (Exception ex) {
             System.out.println("error while inserting record.");
             ex.printStackTrace();
@@ -319,52 +376,43 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         int index = tableOrder.getSelectionModel().getSelectedIndex();
         TempOrder getTempData = tableOrder.getSelectionModel().getSelectedItem();
         if (index >= 0) {
-            tableOrder.getItems().remove(index);
+
 
             int removed = getTempData.getPrice();
             ttotalDisplay = ttotalDisplay - removed;
             totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
 
             System.err.println(finalOrder.size());
+
             if (!finalOrder.isEmpty()) {
                 Iterator<TempOrder> tps = finalOrder.iterator();
                 while (tps.hasNext()) {
                     TempOrder tempsO = tps.next();
-                    if (tempsO.getOrderid() == getTempData.getOrderid()) {
-                        if (tempsO.getQuantity() > 0) {
+                    if (tempsO.getProductname() == getTempData.getProductname()) {
+                        if (tempsO.getQuantity() > 1) {
+
                             int quantity = tempsO.getQuantity();
                             tempsO.setQuantity(quantity - 1);
-                            TempOrder removeOrder = new TempOrder(tempsO.getOrderid(), tempsO.getTransactionid(), tempsO.getProductid(), tempsO.getProductname(), tempsO.getPrice(), tempsO.getQuantity(), tempsO.getTableName(), tempsO.getWaitername(), tempsO.getDrink());
-
+                            TempOrder removeOrder = new TempOrder(tempsO.getOrderid(), tempsO.getTransactionid(), tempsO.getProductid(), tempsO.getProductname(), tempsO.getPrice(), 1, tempsO.getTableName(), tempsO.getWaitername(), tempsO.getDrink());
+                           System.err.println(tempsO.getOrderid() +" - " + tempsO.getProductname()+ " - " +  tempsO.getQuantity() +""+ getTempData.getQuantity());
                             if (tempsO.getOrderid() != 0) {
                                 displayeRemovedOrder.add(removeOrder);
                                 removeChecker = 1;
-
                             }
-                        } else {
+                            tableOrder.refresh();
+
+                        }else{
+                            System.err.println(tempsO.getOrderid() +" + " + tempsO.getProductname()+ " + " +  tempsO.getQuantity() +"+"+ getTempData.getQuantity());
+                            TempOrder removeOrder = new TempOrder(tempsO.getOrderid(), tempsO.getTransactionid(), tempsO.getProductid(), tempsO.getProductname(), tempsO.getPrice(), 1, tempsO.getTableName(), tempsO.getWaitername(), tempsO.getDrink());
+                            if (tempsO.getOrderid() != 0) {
+                                displayeRemovedOrder.add(removeOrder);
+                                removeChecker = 1;
+                            }
+                            tableOrder.getItems().remove(index);
                             tps.remove();
-                        }
-                        tableOrder.refresh();
-                    }
-                }
-            }
-
-            if (!tranOrderID.equals("")) {
-                Iterator<TempOrder> tp = addNewOrdersList.iterator();
-
-                while (tp.hasNext()) {
-
-                    TempOrder tempO = tp.next();
-                    if (tempO.getProductid() == getTempData.getProductid()) {
-                        if (tempO.getQuantity() > 0) {
-                            int quantity = tempO.getQuantity();
-                            tempO.setQuantity(quantity - 1);
-                            tableOrder.refresh();
-                            System.err.println("Removed one , new size: " + addNewOrdersList.size());
-                        } else {
-                            tp.remove();
                             tableOrder.refresh();
                         }
+
                     }
                 }
             }
@@ -374,44 +422,93 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     @FXML
     private void addtoOrder(ActionEvent event) {
-        saveOrdBtn.setDisable(false);
+
         int quantity = Integer.parseInt(oQuantity.getText());
         int duplicate = 0;
 
-        if (!finalOrder.isEmpty()) {
-            Iterator<TempOrder> tps = finalOrder.iterator();
+        if (tranOrderID.equals("")) {
+            if (!finalOrder.isEmpty()) {
+                updateOrdBtn.setDisable(true);
+                saveOrdBtn.setDisable(false);
 
-            while (tps.hasNext()) {
-                TempOrder tempsO = tps.next();
-                System.err.println(tempsO.getProductname() + " - " + pName);
-                if (tempsO.getProductname().equals(pName)) {
-                    int origQ = tempsO.getQuantity();
-                    tempsO.setQuantity(origQ + quantity);
+                Iterator<TempOrder> tps = finalOrder.iterator();
 
-                    int total = tempsO.getPrice() * tempsO.getQuantity();
-                    ttotalDisplay = ttotalDisplay + total;
-                    duplicate = 1;
+                while (tps.hasNext()) {
+                    TempOrder tempsO = tps.next();
+                    System.err.println(tempsO.getProductname() + " - " + pName);
+                    if (tempsO.getProductname().equals(pName)) {
+                        int origQ = tempsO.getQuantity();
+                        tempsO.setQuantity(origQ + quantity);
+
+                        int total = tempsO.getPrice() * tempsO.getQuantity();
+                        ttotalDisplay = ttotalDisplay + total;
+                        duplicate = 1;
+                    }
                 }
+
+
+            }
+            if (duplicate == 0) {
+                displayOrder();
+            } else if (duplicate == 1) {
+
+                orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+                orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+                orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+
+
+                // tableOrder.setItems(finalOrder);
+
+                totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+                tableOrder.refresh();
+                duplicate = 0;
             }
 
         }
 
-        if (duplicate == 0) {
-            displayOrder();
-        } else if (duplicate == 1) {
-            orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
-            orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
-            orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-            orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        else{
+            saveOrdBtn.setDisable(true);
+            updateOrdBtn.setDisable(false);
+
+            int dup=0;
+            if (!addNewOrdersList.isEmpty()) {
+                Iterator<TempOrder> tps = addNewOrdersList.iterator();
+
+                while (tps.hasNext()) {
+                    TempOrder tempsO = tps.next();
+                    System.err.println(tempsO.getProductname() + " - " + pName);
+                    if (tempsO.getProductname().equals(pName)) {
+                        int origQ = tempsO.getQuantity();
+                        tempsO.setQuantity(origQ + quantity);
+
+                        int total = tempsO.getPrice() * tempsO.getQuantity();
+                        ttotalDisplay = ttotalDisplay + total;
+                        dup = 1;
+                    }
+                }
 
 
-            // tableOrder.setItems(finalOrder);
+            }
+            if (dup == 0) {
+                displayNewOrder();
+            } else if (dup == 1) {
 
-            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
-            tableOrder.refresh();
-            duplicate = 0;
+                orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+                orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+                orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+
+
+                // tableOrder.setItems(finalOrder);
+
+                totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+                tableOrder.refresh();
+                dup = 0;
+            }
+            System.err.println("Hello");
+
         }
-
 
     }
 
@@ -430,59 +527,15 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
         temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks);
         displayOrderList.add(temporderD);
+
         if (drinks.equals("YES")) {
             drinkCheck = 1;
             System.err.println("new Order Drink?: " + drinkCheck);
         }
-
-        if (!tranOrderID.equals("")) {
-            addNewOrdersList.add(temporderD);
-            System.err.println("new size: " + addNewOrdersList.size());
-            if (drinks.equals("YES")) {
-                newDrinkChecker = 1;
-            }
-        }
-
-
         ttotalDisplay = ttotalDisplay + Total;
 
 
         return displayOrderList;
-    }
-    public void displayNewOrder() {
-
-        ObservableList<TempOrder> list = getTempList();
-
-        orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
-        orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
-        orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-
-
-
-            tableOrder.getItems().addAll(list);
-            finalOrder.addAll(list);
-            addNewOrdersList.addAll(list);
-
-            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
-
-
-
-    }
-    public boolean isTransactionExistDB() {
-        Connection conn = jdbc.getConnection();
-        Statement st;
-        //System.out.println(query);
-        try {
-            ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid = '" + transactionids + "'");
-            if (!rs.isBeforeFirst()) {
-                return true;
-                //has data
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public void displayOrder() {
@@ -500,9 +553,10 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
 
         } else {
+
             tableOrder.getItems().addAll(list);
             finalOrder.addAll(list);
-            addNewOrdersList.addAll(list);
+
 
             totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
 
@@ -510,7 +564,66 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     }
 
+    private ObservableList<TempOrder> getNewTempList() {
 
+        int quantity = Integer.parseInt(oQuantity.getText());
+        int Total = pPrice * quantity;
+        TempOrder temporderD;
+        ObservableList<TempOrder> displayOrderList = FXCollections.observableArrayList();
+        String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
+
+
+        temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks);
+        displayOrderList.add(temporderD);
+
+
+        System.err.println("new size: " + addNewOrdersList.size());
+        if (drinks.equals("YES")) {
+            newDrinkChecker = 1;
+        }
+        if (drinks.equals("no")) {
+            newFoodChecker = 1;
+        }
+
+
+        ttotalDisplay = ttotalDisplay + Total;
+
+
+        return displayOrderList;
+    }
+
+    public void displayNewOrder() {
+
+        ObservableList<TempOrder> list = getNewTempList();
+
+        orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
+        orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
+        orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+
+
+        tableOrder.getItems().addAll(list);
+        addNewOrdersList.addAll(list);
+
+        totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+    }
+
+
+    public boolean isTransactionExistDB() {
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        //System.out.println(query);
+        try {
+            ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid = '" + transactionids + "'");
+            if (!rs.isBeforeFirst()) {
+                return true;
+                //has data
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
     private void addListenerForTable() {
@@ -531,10 +644,10 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 s = mywaiterList.getSelectionModel().getSelectedItem().toString();
                 System.err.println(s + " - " + oldWaiter);
                 if (s.equals(oldWaiter)) {
-                    saveOrdBtn.setDisable(true);
+                    updateOrdBtn.setDisable(true);
                     addToOrderBtn.setDisable(false);
                 } else {
-                    saveOrdBtn.setDisable(false);
+                    updateOrdBtn.setDisable(false);
                     addToOrderBtn.setDisable(false);
                 }
             }
@@ -629,6 +742,9 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                         updateTable(oldT, tableName);
                     }
                 }
+                if(!addNewOrdersList.isEmpty()) {
+                    finalOrder.addAll(addNewOrdersList);
+                }
                 PreparedStatement prepStmt = conn.prepareStatement("insert into temporder(orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink) values('" + NULL + "',?,?,?,?,?,?,?,?)");
                 Iterator<TempOrder> tp = finalOrder.iterator();
 
@@ -665,17 +781,10 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                                 "successful: " + numUpdates[i] + " rows updated");
                 }
                 conn.commit();
-                sendDrink();
-
-
                 updateTableAvail(tableName);
 
 
             } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (PrintException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -1064,82 +1173,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     }
 
-    public void sendBill() throws PrintException, IOException {
 
-
-        PrintService printService = PrinterOutputStream.getPrintServiceByName(Bar);
-        // get the printer service by name passed on command line...
-        //this call is slow, try to use it only once and reuse the PrintService variable.
-        EscPos escpos;
-        try {
-            escpos = new EscPos(new PrinterOutputStream(printService));
-            String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
-            String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
-            Style title = new Style()
-                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
-                    .setJustification(EscPosConst.Justification.Center);
-
-            Style subtitle = new Style(escpos.getStyle())
-                    .setBold(true)
-                    .setUnderline(Style.Underline.OneDotThick);
-            Style bold = new Style(escpos.getStyle())
-                    .setBold(true);
-            Style totalb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
-                    .setBold(true);
-            Style waiterb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
-                    .setBold(true);
-
-            escpos.writeLF(title, "BAR")
-                    .writeLF(title, tableNumtxt.getText())
-                    .feed(1)
-                    .writeLF(waiterb, "       Waiter: " + waiterName)
-                    .feed(2)
-                    .writeLF(waiterb, "          Cashier Copy        ")
-                    .feed(2)
-                    .writeLF("--------------------------------")
-                    .writeLF(bold, "Transcation no. : " + tranOrderID)
-                    .writeLF("--------------------------------")
-                    .feed(2);
-
-            Connection conn = jdbc.getConnection();
-            String query = "SELECT * FROM temporder WHERE transactionid='" + tranOrderID + "'";
-            Statement st;
-            ResultSet rs;
-            int Total = 0;
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(query);
-                TempOrder temporder;
-
-
-                while (rs.next()) {
-                    temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
-                    int total = rs.getInt("quantity") * rs.getInt("price");
-
-                    escpos.write(rs.getInt("quantity") + " X " + rs.getString("productname") + " " + rs.getInt("price") + "@each" + "    - P" + total)
-                            .feed(1);
-
-
-                }
-
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-            }
-            escpos.feed(1)
-                    .writeLF("--------------------------------")
-                    .writeLF(totalb, "Total :  P" + ttotalDisplay)
-                    .writeLF("--------------------------------")
-                    .feed(5)
-                    .cut(EscPos.CutMode.FULL);
-            escpos.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
 
     public void sendKitchen() throws PrintException, IOException {
 
@@ -1147,94 +1181,180 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         // get the printer service by name passed on command line...
         //this call is slow, try to use it only once and reuse the PrintService variable.
         EscPos escpos;
-        try {
-            escpos = new EscPos(new PrinterOutputStream(printService));
-            String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
-            String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
-            Style title = new Style()
-                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
-                    .setJustification(EscPosConst.Justification.Center);
-
-
-            Style subtitle = new Style(escpos.getStyle())
-                    .setBold(true)
-                    .setUnderline(Style.Underline.OneDotThick);
-            Style bold = new Style(escpos.getStyle())
-                    .setBold(true);
-            Style totalb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
-                    .setBold(true)
-                    .setJustification(EscPosConst.Justification.Center);
-            Style waiterb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
-                    .setBold(true)
-                    .setJustification(EscPosConst.Justification.Center);
-            Style item = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
-                    .setBold(false)
-                    .setJustification(EscPosConst.Justification.Center);
-
-
-            escpos.writeLF(totalb, "BAR")
-                    .writeLF(totalb, tableName)
-                    .writeLF(totalb, "KITCHEN Receipt")
-                    .writeLF("------------------------------------------------")
-                    .writeLF(bold, "  Transaction no.   : " + tranOrderID)
-                    .writeLF(bold, "  Waiter            : " + waiterName)
-                    .writeLF("------------------------------------------------")
-                    .feed(1);
-
-
-            ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
-            Connection conn = jdbc.getConnection();
-            String query = "SELECT * FROM temporder WHERE transactionid='" + tranOrderID + "'";
-            Statement st;
-            ResultSet rs;
-            int Total = 0;
+        EscPos escposs;
+        if (checked == 0) {
             try {
-                st = conn.createStatement();
-                rs = st.executeQuery(query);
-                TempOrder temporder;
-                if (!addNewOrdersList.isEmpty()) {
+                escpos = new EscPos(new PrinterOutputStream(printService));
+                String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
+                String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
+                Style title = new Style()
+                        .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                        .setJustification(EscPosConst.Justification.Center);
 
-                    Iterator<TempOrder> tp = addNewOrdersList.iterator();
-                    while (tp.hasNext()) {
-                        TempOrder tempO = tp.next();
+                Style subtitle = new Style(escpos.getStyle())
+                        .setBold(true)
+                        .setUnderline(Style.Underline.OneDotThick)
+                        .setJustification(EscPosConst.Justification.Center);
+                Style bold = new Style(escpos.getStyle())
+                        .setBold(true);
+                Style totalb = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+                ;
+                Style waiterb = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
 
-                        int total = tempO.getPrice() * tempO.getQuantity();
-                        if (tempO.getDrink().equals("NO")) {
-                            escpos.write(tempO.getQuantity() + " X " + tempO.getProductname() + " " + tempO.getPrice() + "@each" + "    - P" + total)
-                                    .feed(1);
-                        }
-                    }
+                Style Order = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true);
+
+
+                String trans;
+
+                if (tranOrderID.equals("")) {
+                    trans = transactionids;
                 } else {
-                    while (rs.next()) {
-                        temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
-                        int total = rs.getInt("quantity") * rs.getInt("price");
+                    trans = tranOrderID;
+                }
 
-                        if (rs.getString("drink").equals("NO")) {
-                            escpos.writeLF(waiterb, rs.getInt("quantity") + " X " + rs.getString("productname"))
-                                    .feed(1);
+                escpos.writeLF(totalb, "3rd Floor @" + tableName)
+                        .writeLF(totalb, "Kitchen Receipt")
+                        .writeLF("------------------------------------------------")
+                        .writeLF(bold, "Transaction no. : " + trans)
+                        .writeLF(bold, "Waiter          : " + waiterName)
+                        .writeLF("------------------------------------------------")
+                        .feed(2);
+
+                ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+                Connection conn = jdbc.getConnection();
+                String query = "SELECT * FROM temporder WHERE transactionid='" + trans + "'";
+                Statement st;
+                ResultSet rs;
+                int Total = 0;
+                try {
+                    st = conn.createStatement();
+                    rs = st.executeQuery(query);
+                    TempOrder temporder;
+
+                    if (!tranOrderID.equals("")) {
+
+                        Iterator<TempOrder> tp = addNewOrdersList.iterator();
+                        while (tp.hasNext()) {
+                            TempOrder tempO = tp.next();
+
+                            int total = tempO.getPrice() * tempO.getQuantity();
+                            if (tempO.getDrink().equals("NO")) {
+                                escpos.write(Order, tempO.getQuantity() + " X " + tempO.getProductname())
+                                        .feed(1);
+                            }
                         }
+                    } else {
+                        while (rs.next()) {
+                            temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                            int total = rs.getInt("quantity") * rs.getInt("price");
+
+                            if (rs.getString("drink").equals("NO")) {
+                                escpos.writeLF(Order, rs.getInt("quantity") + " X " + rs.getString("productname"))
+                                        .feed(1);
+                            }
+                        }
+
+
+                    }
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                }
+                escpos.feed(1)
+                        .writeLF("------------------------------------------------")
+                        .writeLF(waiterb, "Nothing Follows")
+                        .writeLF("------------------------------------------------")
+                        .feed(5)
+                        .cut(EscPos.CutMode.FULL);
+                escpos.close();
+
+            } catch (IOException ex) {
+                Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.err.println(removeChecker);
+        System.err.println("displayeRemovedOrder Size(@sendKitchen): " + displayeRemovedOrder.size());
+        if (removeChecker == 1 && !displayeRemovedOrder.isEmpty()) {
+            try {
+                PrintService printServices = PrinterOutputStream.getPrintServiceByName(Bar);
+                escposs = new EscPos(new PrinterOutputStream(printServices));
+                String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
+                String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
+
+
+                Style bolds = new Style(escposs.getStyle())
+                        .setBold(true);
+                Style totalbs = new Style(escposs.getStyle())
+                        .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+                Style title = new Style(escposs.getStyle())
+                        .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+
+                Style waiterbs = new Style(escposs.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+
+                Style Orders = new Style(escposs.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true);
+
+
+                String transs;
+
+                if (tranOrderID.equals("")) {
+                    transs = transactionids;
+                } else {
+                    transs = tranOrderID;
+                }
+
+                escposs.writeLF(title, "CANCEL ORDER")
+                        .feed(2)
+                        .writeLF(totalbs, "3rd Floor @" + tableName)
+                        .writeLF(totalbs, "Kitchen Receipt")
+                        .writeLF("------------------------------------------------")
+                        .writeLF(bolds, "Transaction no. : " + transs)
+                        .writeLF(bolds, "Waiter          : " + waiterName)
+                        .writeLF(bolds, "Void By         : " + waiterName)
+                        .writeLF("------------------------------------------------")
+                        .feed(2);
+
+
+                Iterator<TempOrder> tp = displayeRemovedOrder.iterator();
+                while (tp.hasNext()) {
+                    TempOrder tempO = tp.next();
+
+                    int total = tempO.getPrice() * tempO.getQuantity();
+                    if (tempO.getDrink().equals("NO")) {
+                        escposs.write(Orders, tempO.getQuantity() + " X " + tempO.getProductname())
+                                .feed(1);
                     }
                 }
 
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                escposs.feed(1)
+                        .writeLF("------------------------------------------------")
+                        .writeLF(waiterbs, "Nothing Follows")
+                        .writeLF("------------------------------------------------")
+                        .feed(5)
+                        .cut(EscPos.CutMode.FULL);
+                escposs.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
             }
-
-            escpos.feed(1)
-                    .writeLF("------------------------------------------------")
-                    .writeLF(waiterb, "Nothing Follows")
-                    .writeLF("------------------------------------------------")
-                    .feed(5)
-                    .cut(EscPos.CutMode.FULL);
-            escpos.close();
-
-
-        } catch (IOException ex) {
-            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     public void sendDrink() throws PrintException, IOException {
@@ -1300,7 +1420,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     rs = st.executeQuery(query);
                     TempOrder temporder;
 
-                    if (isTransactionExistDB() == true) {
+                    if (!tranOrderID.equals("")) {
 
                         Iterator<TempOrder> tp = addNewOrdersList.iterator();
                         while (tp.hasNext()) {
@@ -1420,132 +1540,10 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
     }
 
 
-    public void officialreceipt() throws PrintException, IOException {
-
-        PrintService printService = PrinterOutputStream.getPrintServiceByName(Cashier);
-        // get the printer service by name passed on command line...
-        //this call is slow, try to use it only once and reuse the PrintService variable.
-        EscPos escpos;
-        openCashDrawer();
-        try {
-            escpos = new EscPos(new PrinterOutputStream(printService));
-            String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
-            String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
-            Style title = new Style()
-                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
-                    .setJustification(EscPosConst.Justification.Center);
 
 
-            Style subtitle = new Style(escpos.getStyle())
-                    .setBold(true)
-                    .setUnderline(Style.Underline.OneDotThick);
-            Style bold = new Style(escpos.getStyle())
-                    .setBold(true);
-            Style totalb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
-                    .setBold(true)
-                    .setJustification(EscPosConst.Justification.Center);
-            Style waiterb = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
-                    .setBold(true)
-                    .setJustification(EscPosConst.Justification.Center);
-            Style item = new Style(escpos.getStyle())
-                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
-                    .setBold(false)
-                    .setJustification(EscPosConst.Justification.Center);
-
-            URL _url = this.getClass().getResource("icon3.png");
-            BufferedImage imageBufferedImage = ImageIO.read(_url);
-            RasterBitImageWrapper imageWrapper = new RasterBitImageWrapper();
 
 
-            Bitonal algorithm = new BitonalOrderedDither();
-            EscPosImage escposImage = new EscPosImage(new CoffeeImageImpl(imageBufferedImage), algorithm);
-            escpos.write(imageWrapper, escposImage);
-
-            escpos.feed(2)
-                    .writeLF(totalb, "HOBBY Restobar")
-                    .writeLF(totalb, "& KTV")
-                    .feed(1)
-                    .writeLF(waiterb, "Polog Consolacion   ")
-                    .writeLF(waiterb, "6001 Consolacion,Philippines")
-                    .feed(2)
-                    .writeLF(totalb, "Official Receipt")
-                    .writeLF("------------------------------------------------")
-                    .writeLF(bold, "  Transaction no.   : " + tranOrderID)
-                    .writeLF(bold, "  Waiter            : " + waiterName)
-                    .writeLF(bold, "  Table             : " + tableName)
-                    .writeLF("------------------------------------------------")
-                    .feed(1);
-
-
-            ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
-            Connection conn = jdbc.getConnection();
-            String query = "SELECT * FROM temporder WHERE transactionid='" + tranOrderID + "'";
-            Statement st;
-            ResultSet rs;
-            int Total = 0;
-            try {
-                st = conn.createStatement();
-                rs = st.executeQuery(query);
-                TempOrder temporder;
-
-                while (rs.next()) {
-                    temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
-                    int total = rs.getInt("quantity") * rs.getInt("price");
-
-                    escpos.writeLF(item, rs.getInt("quantity") + " X " + rs.getString("productname") + " " + rs.getInt("price") + "@e" + " - P" + total)
-                            .feed(1);
-
-
-                }
-
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-            }
-            escpos.feed(1)
-                    .writeLF("------------------------------------------------")
-                    .writeLF("     Total                         P" + ttotalDisplay)
-                    .writeLF("     CASH                          P" + ttotalDisplay)
-                    .writeLF("     Change                        P" + ttotalDisplay)
-                    .writeLF("------------------------------------------------")
-                    .feed(1)
-                    .writeLF(waiterb, "Thank you and Please come again!")
-                    .writeLF(waiterb, "Follow us on Facebook")
-                    .writeLF(waiterb, "www.facebook.com/HOBBY2022")
-                    .feed(1)
-                    .writeLF(waiterb, "CUSTOMER COPY")
-                    .feed(7)
-                    .cut(EscPos.CutMode.FULL);
-
-            escpos.close();
-
-            openCashDrawer();
-        } catch (IOException ex) {
-            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
-    }
-
-
-    public void openCashDrawer() {
-
-        byte[] open = {27, 112, 0, 100, (byte) 250};
-//      byte[] cutter = {29, 86,49};
-        PrintService pservice =
-                PrintServiceLookup.lookupDefaultPrintService();
-        DocPrintJob job = pservice.createPrintJob();
-        DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
-        Doc doc = new SimpleDoc(open, flavor, null);
-        PrintRequestAttributeSet aset = new
-                HashPrintRequestAttributeSet();
-        try {
-            job.print(doc, aset);
-        } catch (PrintException ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
 
 }
 

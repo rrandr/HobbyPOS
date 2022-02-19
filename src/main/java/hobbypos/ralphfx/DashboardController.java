@@ -4,8 +4,14 @@
  */
 package hobbypos.ralphfx;
 
+import com.github.anastaciocintra.escpos.EscPos;
+import com.github.anastaciocintra.escpos.EscPosConst;
+import com.github.anastaciocintra.escpos.Style;
+import com.github.anastaciocintra.escpos.image.*;
+import com.github.anastaciocintra.output.PrinterOutputStream;
 import hobbypos.ralphfx.modal.DataObj;
 import hobbypos.ralphfx.model.Order;
+import hobbypos.ralphfx.model.PrinterData;
 import hobbypos.ralphfx.model.TempOrder;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,6 +34,11 @@ import javafx.scene.layout.TilePane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import javax.print.*;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
@@ -72,6 +83,8 @@ public class DashboardController implements Initializable {
     @FXML
     private Button checkoutBtn;
     @FXML
+    private Button printBtn;
+    @FXML
     private Button btnLookup;
     @FXML
     private TilePane availTable;
@@ -110,6 +123,9 @@ public class DashboardController implements Initializable {
 
             retrieveTable();
             seeAvailableTable();
+            getPrinter();
+
+            checkoutBtn.setDisable(true);
         } catch (SQLException ex) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -184,6 +200,49 @@ public class DashboardController implements Initializable {
             ex.printStackTrace();
         }
     }
+
+
+    @FXML
+    private void getBill() throws PrintException, IOException {
+
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Bill Out");
+        alert.setHeaderText("Are you sure want to print Bill?");
+
+        // option != null.
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if (option.get() == ButtonType.OK) {
+            sendBill();
+            checkoutBtn.setDisable(false);
+       alert.close();
+
+        } else if (option.get() == ButtonType.CANCEL) {
+
+        }
+
+    }
+
+    @FXML
+    private void payBill() throws PrintException, IOException {
+
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Pay Bill");
+        alert.setHeaderText("Are you sure want to print Final Bill?");
+
+        // option != null.
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if (option.get() == ButtonType.OK) {
+            officialreceipt();
+            alert.close();
+
+        } else if (option.get() == ButtonType.CANCEL) {
+
+        }
+
+    }
+
 
     @FXML
     private void logout(ActionEvent event) {
@@ -354,7 +413,7 @@ public class DashboardController implements Initializable {
                 btn.setPrefSize(150, 40);
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(false);
-                    checkoutBtn.setDisable(true);
+                    printBtn.setDisable(true);
                     addOrder.setDisable(true);
                 });
 
@@ -416,8 +475,8 @@ public class DashboardController implements Initializable {
                 btn.setId(tableid);
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(true);
+                    printBtn.setDisable(false);
                     addOrder.setDisable(false);
-                    checkoutBtn.setDisable(false);
 
                 });
 
@@ -504,6 +563,7 @@ public class DashboardController implements Initializable {
         return waiter;
     }
 
+
     private ObservableList<TempOrder> getOrderList(String tableN) {
 
         System.out.println("Pasok Ako sa getOrderList");
@@ -522,6 +582,9 @@ public class DashboardController implements Initializable {
                 Total = Total + (temporder.getPrice() * temporder.getQuantity());
                 tempOrderList.add(temporder);
                 WaiterN = temporder.getWaitername();
+                TableName = temporder.getTableName();
+                transID = temporder.getTransactionid();
+
 
             }
         } catch (Exception ex) {
@@ -550,5 +613,271 @@ public class DashboardController implements Initializable {
 
         }
 
+    }
+
+    String Cashier;
+    String Kitchen;
+    String Bar;
+    String KTV;
+
+
+    public void getPrinter() {
+
+        Connection conn = jdbc.getConnection();
+        String query = "SELECT * FROM printer";
+        Statement st;
+        ResultSet rs;
+        System.err.println("kasulod ko");
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            PrinterData printer;
+
+            while (rs.next()) {
+                printer = new PrinterData(rs.getInt("printerID"), rs.getString("printername"), rs.getString("assign"));
+
+
+                if (rs.getString("assign").equals("CASHIER")) {
+                    Cashier = rs.getString("printername");
+                }
+                if (rs.getString("assign").equals("KITCHEN")) {
+                    Kitchen = rs.getString("printername");
+                }
+                if (rs.getString("assign").equals("BAR")) {
+                    Bar = rs.getString("printername");
+                }
+                if (rs.getString("assign").equals("KTV")) {
+                    KTV = rs.getString("printername");
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+
+    }
+    public void sendBill() throws PrintException, IOException {
+
+
+        PrintService printService = PrinterOutputStream.getPrintServiceByName(Cashier);
+        // get the printer service by name passed on command line...
+        //this call is slow, try to use it only once and reuse the PrintService variable.
+        EscPos escpos;
+
+        try {
+            escpos = new EscPos(new PrinterOutputStream(printService));
+            Style title = new Style()
+                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                    .setJustification(EscPosConst.Justification.Center);
+
+
+            Style subtitle = new Style(escpos.getStyle())
+                    .setBold(true)
+                    .setUnderline(Style.Underline.OneDotThick);
+            Style bold = new Style(escpos.getStyle())
+                    .setBold(true)
+                     .setFontSize(Style.FontSize._1, Style.FontSize._1);
+            Style totalb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style waiterb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style item = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(false)
+                    .setJustification(EscPosConst.Justification.Left_Default);
+            Style totalss = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Right);
+
+            escpos.feed(2)
+                    .writeLF(totalb, "HOBBY Restobar")
+                    .writeLF(totalb, "& KTV")
+                    .feed(1)
+                    .writeLF(waiterb, "Polog Consolacion   ")
+                    .writeLF(waiterb, "6001 Consolacion,Philippines")
+                    .feed(2)
+                    .writeLF(totalb, "Bill Receipt")
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold, "  Transaction no.   : " + transID)
+                    .writeLF(bold, "  Waiter            : " + WaiterN)
+                    .writeLF(bold, "  Table             : " + TableName)
+                    .writeLF("------------------------------------------------")
+                    .feed(1);
+
+
+            ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+            Connection conn = jdbc.getConnection();
+            String query = "SELECT * FROM temporder WHERE transactionid='" + transID + "'";
+            Statement st;
+            ResultSet rs;
+            int Total = 0;
+            try {
+                st = conn.createStatement();
+                rs = st.executeQuery(query);
+                TempOrder temporder;
+
+                while (rs.next()) {
+                    temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                    int total = rs.getInt("quantity") * rs.getInt("price");
+
+                    escpos.writeLF(item, rs.getInt("quantity") + " X " + rs.getInt("price") +".0           "+rs.getString("productname")).write(totalss," P" + total)
+                            .writeLF(totalss,"");
+
+
+                }
+
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+            escpos.feed(1)
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold,"     Total                         P" + totalDisplay.getText())
+                    .writeLF("------------------------------------------------")
+                    .feed(1)
+                    .writeLF(waiterb, "WAITER COPY")
+                    .feed(7)
+                    .cut(EscPos.CutMode.FULL);
+
+            escpos.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
+    public void officialreceipt() throws PrintException, IOException {
+
+        PrintService printService = PrinterOutputStream.getPrintServiceByName(Cashier);
+        // get the printer service by name passed on command line...
+        //this call is slow, try to use it only once and reuse the PrintService variable.
+        EscPos escpos;
+        openCashDrawer();
+        try {
+            escpos = new EscPos(new PrinterOutputStream(printService));
+            Style title = new Style()
+                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                    .setJustification(EscPosConst.Justification.Center);
+
+
+            Style subtitle = new Style(escpos.getStyle())
+                    .setBold(true)
+                    .setUnderline(Style.Underline.OneDotThick);
+            Style bold = new Style(escpos.getStyle())
+                    .setBold(true);
+            Style totalb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style waiterb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style item = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Left_Default);
+            Style totalss = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Right);
+
+            URL _url = this.getClass().getResource("icon3.png");
+            BufferedImage imageBufferedImage = ImageIO.read(_url);
+            RasterBitImageWrapper imageWrapper = new RasterBitImageWrapper();
+
+
+            Bitonal algorithm = new BitonalOrderedDither();
+            EscPosImage escposImage = new EscPosImage(new CoffeeImageImpl(imageBufferedImage), algorithm);
+            escpos.write(imageWrapper, escposImage);
+
+            escpos.feed(2)
+                    .writeLF(totalb, "HOBBY Restobar")
+                    .writeLF(totalb, "& KTV")
+                    .feed(1)
+                    .writeLF(waiterb, "Polog Consolacion   ")
+                    .writeLF(waiterb, "6001 Consolacion,Philippines")
+                    .feed(2)
+                    .writeLF(totalb, "Acknowledgement Receipt")
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold, "  Transaction no.   : " + transID)
+                    .writeLF(bold, "  Waiter            : " + WaiterN)
+                    .writeLF(bold, "  Table             : " + TableName)
+                    .writeLF("------------------------------------------------")
+                    .feed(1);
+
+
+            ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+            Connection conn = jdbc.getConnection();
+            String query = "SELECT * FROM temporder WHERE transactionid='" + transID + "'";
+            Statement st;
+            ResultSet rs;
+            int Total = 0;
+            try {
+                st = conn.createStatement();
+                rs = st.executeQuery(query);
+                TempOrder temporder;
+
+                while (rs.next()) {
+                    temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                    int total = rs.getInt("quantity") * rs.getInt("price");
+
+                    escpos.writeLF(item, rs.getInt("quantity") + " X " + rs.getInt("price") +".0           "+rs.getString("productname")).write(totalss," P" + total)
+                            .writeLF(totalss,"");
+
+
+
+                }
+
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+            escpos.feed(1)
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold,"     Total                         P" + totalDisplay.getText())
+                    .writeLF(bold,"     CASH                          P" + totalDisplay.getText())
+                    .writeLF(bold,"     Change                        P" + totalDisplay.getText())
+                    .writeLF("------------------------------------------------")
+                    .feed(1)
+                    .writeLF(waiterb, "Thank you and Please come again!")
+                    .writeLF(waiterb, "Follow us on Facebook")
+                    .writeLF(waiterb, "www.facebook.com/HOBBY2022")
+                    .feed(1)
+                    .writeLF(waiterb, "CUSTOMER COPY")
+                    .feed(7)
+                    .cut(EscPos.CutMode.FULL);
+
+            escpos.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
+    public void openCashDrawer() {
+
+        byte[] open = {27, 112, 0, 100, (byte) 250};
+//      byte[] cutter = {29, 86,49};
+        PrintService pservice =
+                PrintServiceLookup.lookupDefaultPrintService();
+        DocPrintJob job = pservice.createPrintJob();
+        DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
+        Doc doc = new SimpleDoc(open, flavor, null);
+        PrintRequestAttributeSet aset = new
+                HashPrintRequestAttributeSet();
+        try {
+            job.print(doc, aset);
+        } catch (PrintException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }
