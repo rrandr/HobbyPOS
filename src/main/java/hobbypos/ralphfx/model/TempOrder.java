@@ -21,7 +21,7 @@ public class TempOrder {
     private String drink;
     private int total;
 
-    public TempOrder(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN , String drinks) {
+    public TempOrder(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks) {
         this.orderid = orderID;
         this.productid = productID;
         this.productname = productName;

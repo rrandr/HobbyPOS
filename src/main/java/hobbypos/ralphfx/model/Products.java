@@ -11,7 +11,6 @@ package hobbypos.ralphfx.model;
 import java.sql.Blob;
 
 /**
- *
  * @author Admin
  */
 public class Products {

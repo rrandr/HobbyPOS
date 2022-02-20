@@ -16,20 +16,20 @@ public class PrinterData {
         return printerID;
     }
 
-    public String getAssign() {
-        return assign;
+    public void setPrinterID(int printerID) {
+        this.printerID = printerID;
     }
 
-    public String getPrintername() {
-        return printername;
+    public String getAssign() {
+        return assign;
     }
 
     public void setAssign(String assign) {
         this.assign = assign;
     }
 
-    public void setPrinterID(int printerID) {
-        this.printerID = printerID;
+    public String getPrintername() {
+        return printername;
     }
 
     public void setPrintername(String printername) {

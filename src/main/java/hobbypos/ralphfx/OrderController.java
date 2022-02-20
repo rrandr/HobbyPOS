@@ -86,6 +86,19 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
     DataObj jdbc;
     ObservableList<TempOrder> finalOrder = FXCollections.observableArrayList();
     ObservableList<TempOrder> displayeRemovedOrder = FXCollections.observableArrayList();
+    int drinkCheck;
+    int newDrinkChecker;
+    int newFoodChecker;
+    int removeChecker;
+    String oldWaiter;
+    ObservableList<TempOrder> existingOrderList = FXCollections.observableArrayList();
+    ObservableList<TempOrder> addNewOrdersList = FXCollections.observableArrayList();
+    int checked = 0;
+    int foodCheck=0;
+    String Cashier;
+    String Kitchen;
+    String Bar;
+    String KTV;
     private Label tableNum;
     @FXML
     private TilePane catTile;
@@ -122,11 +135,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
     @FXML
     private Button DeleteItemBtn;
 
-    int drinkCheck;
-    int newDrinkChecker;
-    int newFoodChecker;
-    int removeChecker;
-
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         jdbc = new DataObj();
@@ -150,8 +158,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
         oldT = tableNumtxt.getText();
     }
-
-    String oldWaiter;
 
     private void populateWaiterList() {
         Connection conn = jdbc.getConnection();
@@ -203,7 +209,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         myTableList.setItems(list);
 
     }
-
 
     private void setPrimaryStage(Stage pStage) {
         OrderController.pStage = pStage;
@@ -294,6 +299,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
                 insertRecord();
                 sendKitchen();
+                sendDrink();
 
                 //officialreceipt();
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
@@ -329,7 +335,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         try {
 
 
-                SaveOrderDB(event);
+            SaveOrderDB(event);
 
         } catch (Exception ex) {
             System.out.println("error while inserting record.");
@@ -337,6 +343,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
 
     }
+
     @FXML
     private void updateOrder(ActionEvent event) throws PrintException, IOException {
 
@@ -347,8 +354,8 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         System.err.println("Awa ragud ni : " + tranOrderID);
         try {
 
-                ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid='" + tranOrderID + "'");
-                deleteEntry();
+            ResultSet rs = conn.createStatement().executeQuery("select * from temporder where transactionid='" + tranOrderID + "'");
+            deleteEntry();
             UpdateOrderDB(event);
 
         } catch (Exception ex) {
@@ -357,7 +364,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
 
     }
-
 
     private void deleteEntry() {
         Connection conn = jdbc.getConnection();
@@ -369,7 +375,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             System.out.println(ex.getMessage());
         }
     }
-
 
     @FXML
     private void removeOrderItem(ActionEvent event) {
@@ -394,15 +399,15 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                             int quantity = tempsO.getQuantity();
                             tempsO.setQuantity(quantity - 1);
                             TempOrder removeOrder = new TempOrder(tempsO.getOrderid(), tempsO.getTransactionid(), tempsO.getProductid(), tempsO.getProductname(), tempsO.getPrice(), 1, tempsO.getTableName(), tempsO.getWaitername(), tempsO.getDrink());
-                           System.err.println(tempsO.getOrderid() +" - " + tempsO.getProductname()+ " - " +  tempsO.getQuantity() +""+ getTempData.getQuantity());
+                            System.err.println(tempsO.getOrderid() + " - " + tempsO.getProductname() + " - " + tempsO.getQuantity() + "" + getTempData.getQuantity());
                             if (tempsO.getOrderid() != 0) {
                                 displayeRemovedOrder.add(removeOrder);
                                 removeChecker = 1;
                             }
                             tableOrder.refresh();
 
-                        }else{
-                            System.err.println(tempsO.getOrderid() +" + " + tempsO.getProductname()+ " + " +  tempsO.getQuantity() +"+"+ getTempData.getQuantity());
+                        } else {
+                            System.err.println(tempsO.getOrderid() + " + " + tempsO.getProductname() + " + " + tempsO.getQuantity() + "+" + getTempData.getQuantity());
                             TempOrder removeOrder = new TempOrder(tempsO.getOrderid(), tempsO.getTransactionid(), tempsO.getProductid(), tempsO.getProductname(), tempsO.getPrice(), 1, tempsO.getTableName(), tempsO.getWaitername(), tempsO.getDrink());
                             if (tempsO.getOrderid() != 0) {
                                 displayeRemovedOrder.add(removeOrder);
@@ -465,13 +470,11 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 duplicate = 0;
             }
 
-        }
-
-        else{
+        } else {
             saveOrdBtn.setDisable(true);
             updateOrdBtn.setDisable(false);
 
-            int dup=0;
+            int dup = 0;
             if (!addNewOrdersList.isEmpty()) {
                 Iterator<TempOrder> tps = addNewOrdersList.iterator();
 
@@ -512,10 +515,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     }
 
-    ObservableList<TempOrder> existingOrderList = FXCollections.observableArrayList();
-    ObservableList<TempOrder> addNewOrdersList = FXCollections.observableArrayList();
-
-
     private ObservableList<TempOrder> getTempList() {
 
         int quantity = Integer.parseInt(oQuantity.getText());
@@ -531,6 +530,8 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         if (drinks.equals("YES")) {
             drinkCheck = 1;
             System.err.println("new Order Drink?: " + drinkCheck);
+        }else{
+            foodCheck=1;
         }
         ttotalDisplay = ttotalDisplay + Total;
 
@@ -608,7 +609,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
     }
 
-
     public boolean isTransactionExistDB() {
         Connection conn = jdbc.getConnection();
         Statement st;
@@ -624,7 +624,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
         return false;
     }
-
 
     private void addListenerForTable() {
         tableOrder.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -656,7 +655,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     }
 
-
     @FXML
     private void manageWaiter(ActionEvent event) {
         try {
@@ -667,7 +665,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
 
     }
-
 
     public void displayTempOrder() {
 
@@ -723,8 +720,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         return tempOrderList;
     }
 
-    int checked = 0;
-
     private void insertRecord() {
 
         if (!finalOrder.isEmpty()) {
@@ -742,7 +737,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                         updateTable(oldT, tableName);
                     }
                 }
-                if(!addNewOrdersList.isEmpty()) {
+                if (!addNewOrdersList.isEmpty()) {
                     finalOrder.addAll(addNewOrdersList);
                 }
                 PreparedStatement prepStmt = conn.prepareStatement("insert into temporder(orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink) values('" + NULL + "',?,?,?,?,?,?,?,?)");
@@ -767,6 +762,9 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     prepStmt.addBatch();
                     if (tempO.getDrink().equals("YES")) {
                         checked = 1;
+                    }else
+                    {
+                        foodCheck=1;
                     }
                 }
 
@@ -789,7 +787,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             }
         }
     }
-
 
     public void updateTableAvail(String tablen) {
 
@@ -818,7 +815,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             ex.printStackTrace();
         }
     }
-
 
     @FXML
     public void quantityHandler(ActionEvent event) {
@@ -976,7 +972,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
     }
 
-
     private void getProduct(String category) throws SQLException, IOException {
         DataObj jdbcDao = new DataObj();
         Connection conn = jdbcDao.getConnection();
@@ -1130,12 +1125,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     }
 
-    String Cashier;
-    String Kitchen;
-    String Bar;
-    String KTV;
-
-
     public void getPrinter() {
 
         Connection conn = jdbc.getConnection();
@@ -1174,7 +1163,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
     }
 
 
-
     public void sendKitchen() throws PrintException, IOException {
 
         PrintService printService = PrinterOutputStream.getPrintServiceByName(Kitchen);
@@ -1182,7 +1170,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         //this call is slow, try to use it only once and reuse the PrintService variable.
         EscPos escpos;
         EscPos escposs;
-        if (checked == 0) {
+        if (foodCheck==1 || newFoodChecker==1) {
             try {
                 escpos = new EscPos(new PrinterOutputStream(printService));
                 String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
@@ -1363,7 +1351,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         //this call is slow, try to use it only once and reuse the PrintService variable.
         EscPos escpos;
         EscPos escposs;
-        if (checked == 1) {
+        if (checked==1 || newDrinkChecker==1) {
             try {
                 escpos = new EscPos(new PrinterOutputStream(printService));
                 String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
@@ -1538,11 +1526,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
 
     }
-
-
-
-
-
 
 
 }

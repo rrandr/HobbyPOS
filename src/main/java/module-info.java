@@ -1,4 +1,4 @@
-module hobbypos.hobbyktvpos {
+module hobbypos {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;
@@ -13,4 +13,5 @@ module hobbypos.hobbyktvpos {
     exports hobbypos.ralphfx;
     opens hobbypos.ralphfx.model to javafx.base;
     opens hobbypos.ralphfx;
+
 }

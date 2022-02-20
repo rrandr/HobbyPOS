@@ -41,14 +41,14 @@ public class PrinterController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-            System.out.println("Usage: java -jar getstart.jar (\"printer name\")");
-            System.out.println("Printer list to use:");
-            String[] printServicesNames = PrinterOutputStream.getListPrintServicesNames();
+        System.out.println("Usage: java -jar getstart.jar (\"printer name\")");
+        System.out.println("Printer list to use:");
+        String[] printServicesNames = PrinterOutputStream.getListPrintServicesNames();
         ObservableList<String> list = FXCollections.observableArrayList();
-            for(String printServiceName: printServicesNames){
-                System.out.println(printServiceName);
-                list.add(printServiceName);
-            }
+        for (String printServiceName : printServicesNames) {
+            System.out.println(printServiceName);
+            list.add(printServiceName);
+        }
 
         barCombo.setItems(null);
         barCombo.setItems(list);
@@ -61,25 +61,31 @@ public class PrinterController implements Initializable {
 
 
     }
+
     @FXML
-    public void saveSettings(ActionEvent event){
+    public void saveSettings(ActionEvent event) {
         deletePrinter();
 
-        String bar = barCombo.getSelectionModel().getSelectedItem().toString();;
-        String drink = drinkCombo.getSelectionModel().getSelectedItem().toString();;
-        String kitchen = kCombo.getSelectionModel().getSelectedItem().toString();;
-        String ktv = ktvCombo.getSelectionModel().getSelectedItem().toString();;
+        String bar = barCombo.getSelectionModel().getSelectedItem().toString();
+        ;
+        String drink = drinkCombo.getSelectionModel().getSelectedItem().toString();
+        ;
+        String kitchen = kCombo.getSelectionModel().getSelectedItem().toString();
+        ;
+        String ktv = ktvCombo.getSelectionModel().getSelectedItem().toString();
+        ;
 
-        insert(bar,"CASHIER");
+        insert(bar, "CASHIER");
         insert(drink, "BAR");
         insert(kitchen, "KITCHEN");
-        insert(ktv,"KTV");
+        insert(ktv, "KTV");
 
         successTxt.setText("Printer Assignment has been set!");
     }
-    private void insert(String printerName, String assign){
 
-        DataObj  jdbc = new DataObj();
+    private void insert(String printerName, String assign) {
+
+        DataObj jdbc = new DataObj();
         Connection conn = jdbc.getConnection();
         try {
             conn.setAutoCommit(false);
@@ -108,7 +114,7 @@ public class PrinterController implements Initializable {
 
     private void deletePrinter() {
 
-        DataObj  jdbc = new DataObj();
+        DataObj jdbc = new DataObj();
         Connection conn = jdbc.getConnection();
         try {
             String query = "DELETE FROM printer";
@@ -121,7 +127,7 @@ public class PrinterController implements Initializable {
 
     private void executeQuery(String query) {
 
-        DataObj  jdbc = new DataObj();
+        DataObj jdbc = new DataObj();
         Connection conn = jdbc.getConnection();
         Statement st;
         System.out.println(query);

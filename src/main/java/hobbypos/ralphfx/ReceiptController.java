@@ -1,7 +1,6 @@
 package hobbypos.ralphfx;
 
 /**
- *
  * @author ccs
  */
 
@@ -25,7 +24,13 @@ public class ReceiptController extends javax.swing.JFrame {
     Double balance = 0.0;
     Double bHeight = 0.0;
 
+    protected static double cm_to_pp(double cm) {
+        return toPPI(cm * 0.393600787);
+    }
 
+    protected static double toPPI(double inch) {
+        return inch * 72d;
+    }
 
     @FXML
     public void startPrint(javafx.event.ActionEvent actionEvent) {
@@ -62,18 +67,6 @@ public class ReceiptController extends javax.swing.JFrame {
 
         return pf;
     }
-
-
-    protected static double cm_to_pp(double cm) {
-        return toPPI(cm * 0.393600787);
-    }
-
-    protected static double toPPI(double inch) {
-        return inch * 72d;
-    }
-
-
-
 
     public class BillPrintable implements Printable {
 
@@ -123,13 +116,13 @@ public class ReceiptController extends javax.swing.JFrame {
                     g2d.drawString("-------------------------------------", 10, y);
                     y += headerRectHeight;
 
-                  //  for (int s = 0; s < r; s++) {
-                   //     g2d.drawString(" " + itemName.get(s) + "                            ", 10, y);
-                 //       y += yShift;
-                   //     g2d.drawString("      " + quantity.get(s) + " * " + itemPrice.get(s), 10, y);
-                  //      g2d.drawString(subtotal.get(s), 160, y);
-                  //      y += yShift;
-                 //   }
+                    //  for (int s = 0; s < r; s++) {
+                    //     g2d.drawString(" " + itemName.get(s) + "                            ", 10, y);
+                    //       y += yShift;
+                    //     g2d.drawString("      " + quantity.get(s) + " * " + itemPrice.get(s), 10, y);
+                    //      g2d.drawString(subtotal.get(s), 160, y);
+                    //      y += yShift;
+                    //   }
 
                     g2d.drawString("-------------------------------------", 10, y);
                     y += yShift;
