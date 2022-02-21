@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" id="AnchorPane" prefHeight="400.0" prefWidth="600.0"
-            fx:controller="hobbypos.ralphfx.LookupController">
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17" fx:controller="hobbypos.ralphfx.LookupController">
     <children>
         <TableView fx:id="tableProducts" layoutX="15.0" layoutY="85.0" prefHeight="643.0" prefWidth="907.0">
             <columns>
-                <TableColumn fx:id="colId" prefWidth="75.0" text="Id"/>
-                <TableColumn fx:id="colDescription" minWidth="230.0" prefWidth="75.0" text="Description"/>
-                <TableColumn fx:id="colPrice" prefWidth="75.0" text="Price"/>
-                <TableColumn fx:id="colCategory" prefWidth="75.0" text="Category"/>
-                <TableColumn fx:id="colStatus" prefWidth="75.0" text="Status"/>
+                <TableColumn fx:id="colId" prefWidth="186.0" text="Transaction" />
+                <TableColumn fx:id="colDescription" minWidth="119.0" prefWidth="119.0" text="Table" />
+                <TableColumn fx:id="colPrice" prefWidth="149.0" text="Waiter" />
+                <TableColumn fx:id="colCategory" prefWidth="180.0" text="Date" />
             </columns>
         </TableView>
-        <TextField layoutX="15.0" layoutY="45.0" prefHeight="25.0" prefWidth="907.0"/>
-        <Label layoutX="14.0" layoutY="17.0" text="Search for Product">
+        <TextField fx:id="searchBox" layoutX="15.0" layoutY="45.0" prefHeight="25.0" prefWidth="907.0" />
+        <Label layoutX="14.0" layoutY="17.0" text="Search for Transaction">
             <font>
-                <Font name="System Bold" size="12.0"/>
+                <Font name="System Bold" size="12.0" />
             </font>
         </Label>
     </children>
     <padding>
-        <Insets bottom="8.0" left="8.0" right="8.0"/>
+        <Insets bottom="8.0" left="8.0" right="8.0" />
     </padding>
 </AnchorPane>
