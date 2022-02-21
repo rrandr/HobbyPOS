@@ -24,6 +24,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -261,6 +262,7 @@ public class VerifyController implements Initializable {
             infoBox("Wrong Credentials or Only authorize personnel only", null, "Failed");
         } else {
             Stage stage = (Stage) loginBtn.getScene().getWindow();
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
             // do what you have to do
             stage.close();
 

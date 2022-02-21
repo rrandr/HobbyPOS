@@ -22,6 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -292,6 +293,7 @@ public class PaymentController implements Initializable {
                 stage.setScene(new Scene(root));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.initOwner(PayBtn.getScene().getWindow());
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.showAndWait();
 
                 VerifyController dashboard = loader.getController();
@@ -316,6 +318,7 @@ public class PaymentController implements Initializable {
                         Stage stages = new Stage();
                         stages.setTitle("Hobby Bar POS | Dashboard");
                         stages.setScene(new Scene(roots));
+                        stages.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                         stages.show();
                         ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -345,6 +348,7 @@ public class PaymentController implements Initializable {
                     Stage stagez = new Stage();
                     stagez.setTitle("Hobby Bar POS | Dashboard");
                     stagez.setScene(new Scene(rootz));
+                    stagez.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                     stagez.show();
                     ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -380,6 +384,7 @@ public class PaymentController implements Initializable {
                 Stage stage = new Stage();
                 stage.setTitle("Hobby Bar POS | Dashboard");
                 stage.setScene(new Scene(root));
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.show();
                 ((Node) (event.getSource())).getScene().getWindow().hide();
 

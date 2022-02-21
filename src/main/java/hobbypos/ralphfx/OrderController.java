@@ -151,6 +151,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
     }
 
+
     public void setTranID(String tranID) {
         transID.setText(tranID);
         tranOrderID = tranID;
@@ -224,6 +225,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         window.setIconified(false);
 //        window.initStyle(StageStyle.UNDECORATED);
         window.setTitle(title);
+        window.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
         setPrimaryStage(window);
         window.showAndWait();
 
@@ -265,6 +267,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 Stage stage = new Stage();
                 stage.setTitle("Hobby Bar POS | Dashboard");
                 stage.setScene(new Scene(root));
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.show();
                 ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -292,6 +295,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 // I guess you forgot this line????
                 stage.setScene(new Scene(root));
                 stage.initModality(Modality.APPLICATION_MODAL);
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.initOwner(updateOrdBtn.getScene().getWindow());
                 stage.showAndWait();
 
@@ -325,6 +329,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                         Stage stages = new Stage();
                         stages.setTitle("Hobby Bar POS | Dashboard");
                         stages.setScene(new Scene(roots));
+                        stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                         stages.show();
                         ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -361,6 +366,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     Stage stagess = new Stage();
                     stagess.setTitle("Hobby Bar POS | Dashboard");
                     stagess.setScene(new Scene(rootss));
+                    stagess.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                     stagess.show();
                     ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -942,6 +948,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     Stage stage = new Stage();
                     stage.setTitle("Hobby Bar POS | Dashboard");
                     stage.setScene(new Scene(root));
+                    stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                     stage.show();
                     ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -980,6 +987,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     Stage stage = new Stage();
                     stage.setTitle("Hobby Bar POS | Dashboard");
                     stage.setScene(new Scene(root));
+                    stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                     stage.show();
                     ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -1031,6 +1039,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 Stage stage = new Stage();
                 stage.setTitle("Hobby Bar POS | Dashboard");
                 stage.setScene(new Scene(root));
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.show();
                 ((Node) (event.getSource())).getScene().getWindow().hide();
 

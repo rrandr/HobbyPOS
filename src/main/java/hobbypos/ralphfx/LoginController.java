@@ -27,6 +27,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -256,6 +257,8 @@ public class LoginController implements Initializable {
 
                 Stage stage = new Stage();
                 stage.setTitle("Hobby Bar POS | Dashboard");
+
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.setScene(new Scene(root));
 
                 System.err.println(getUserInfo(Integer.parseInt(username)));

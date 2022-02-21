@@ -131,6 +131,22 @@ public class DashboardController implements Initializable {
         }
     }
 
+
+    @FXML
+    public void refresh(){
+        try {
+            jdbc = new DataObj();
+
+            retrieveTable();
+            seeAvailableTable();
+            getPrinter();
+
+            checkoutBtn.setDisable(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void setUsername(String username) {
         lblUsername.setText(username);
     }
@@ -172,6 +188,7 @@ public class DashboardController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Hobby Bar POS | New Order");
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
             stage.show();
             ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -192,6 +209,7 @@ public class DashboardController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Hobby Bar POS | New Order");
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
             stage.show();
             ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -212,6 +230,7 @@ public class DashboardController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Hobby Bar POS | Pay Bill");
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
             stage.show();
             ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -260,6 +279,7 @@ public class DashboardController implements Initializable {
                 Stage stage = new Stage();
                 stage.setTitle("Hobby Bar POS | Login");
                 stage.setScene(new Scene(root));
+                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.show();
                 ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -281,6 +301,7 @@ public class DashboardController implements Initializable {
         window.initModality(Modality.APPLICATION_MODAL);
         window.setAlwaysOnTop(true);
         window.setIconified(false);
+        window.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
 //        window.initStyle(StageStyle.UNDECORATED);
         window.setTitle(title);
         setPrimaryStage(window);
@@ -367,6 +388,7 @@ public class DashboardController implements Initializable {
                         Stage stage = new Stage();
                         stage.setTitle("Hobby Bar POS | Login");
                         stage.setScene(new Scene(root));
+                        stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                         stage.show();
                         ((Node) (event.getSource())).getScene().getWindow().hide();
 
@@ -848,6 +870,7 @@ public class DashboardController implements Initializable {
         stage.setScene(new Scene(root));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(cancelBtn.getScene().getWindow());
+        stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
         stage.showAndWait();
 
         VerifyController dashboard = loader.getController();

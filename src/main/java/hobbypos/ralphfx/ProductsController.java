@@ -213,6 +213,7 @@ public class ProductsController implements Initializable {
         window.setIconified(false);
 //        window.initStyle(StageStyle.UNDECORATED);
         window.setTitle(title);
+        window.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
         window.showAndWait();
     }
 
@@ -326,6 +327,7 @@ public class ProductsController implements Initializable {
             String isweight = cbWeight.getSelectionModel().getSelectedItem();
             String status = cbStatus.getSelectionModel().getSelectedItem();
             Window owner = (Stage) etDescription.getScene().getWindow();
+
             if (barcode.isEmpty() || description.isEmpty() || price.isEmpty() || category.isEmpty()
                     || isweight.isEmpty() || status.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, owner, "Please fillup the form correctly.", "Form Error!");
