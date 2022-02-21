@@ -5,13 +5,16 @@
 package hobbypos.ralphfx;
 
 import hobbypos.ralphfx.modal.DataObj;
-import hobbypos.ralphfx.model.Products;
+import hobbypos.ralphfx.model.Order;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
@@ -31,17 +34,17 @@ public class LookupController implements Initializable {
 
     DataObj jdbc;
     @FXML
-    private TableView<Products> tableProducts;
+    private TableView<Order> tableProducts;
     @FXML
-    private TableColumn<Products, Integer> colId;
+    private TableColumn<Order, String> colId;
     @FXML
-    private TableColumn<Products, String> colDescription;
+    private TableColumn<Order, String> colDescription;
     @FXML
-    private TableColumn<Products, String> colPrice;
+    private TableColumn<Order, String> colPrice;
     @FXML
-    private TableColumn<Products, String> colCategory;
+    private TableColumn<Order, String> colCategory;
     @FXML
-    private TableColumn<Products, String> colStatus;
+    private TextField searchBox;
 
     /**
      * Initializes the controller class.
@@ -50,40 +53,82 @@ public class LookupController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
         jdbc = new DataObj();
-        showProducts();
+        showTransactions();
+        search();
     }
 
-    public void showProducts() {
-        ObservableList<Products> list = getProductList();
-        colId.setCellValueFactory(new PropertyValueFactory<Products, Integer>("id"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<Products, String>("description"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<Products, String>("price"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<Products, String>("category"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<Products, String>("status"));
+    public void showTransactions() {
+        ObservableList<Order> list = getOrderList();
+
+
+        colId.setCellValueFactory(new PropertyValueFactory<Order, String>("transactionid"));
+        colDescription.setCellValueFactory(new PropertyValueFactory<Order, String>("tableName"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<Order, String>("waitername"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<Order, String>("OrderDate"));
 
         tableProducts.setItems(list);
     }
-
-    private ObservableList<Products> getProductList() {
-        ObservableList<Products> productList = FXCollections.observableArrayList();
+    ObservableList<Order> searchOrderList = FXCollections.observableArrayList();
+    private ObservableList<Order> getOrderList() {
+        ObservableList<Order> OrdertList = FXCollections.observableArrayList();
         Connection conn = jdbc.getConnection();
-        String query = "SELECT * FROM products";
+        String query = "SELECT DISTINCT  transactionid,tableName,waiterName,OrderDate from Orders ";
         Statement st;
         ResultSet rs;
 
         try {
             st = conn.createStatement();
             rs = st.executeQuery(query);
-            Products products;
+            Order orders;
             while (rs.next()) {
-                products = new Products(rs.getInt("id"), rs.getString("barcode"), rs.getString("description"), rs.getString("price"), rs.getString("category"), rs.getBlob("image"), rs.getString("status"));
-                productList.add(products);
+                orders = new Order(rs.getString("transactionid"), rs.getString("tableName"), rs.getString("waitername"), rs.getString("OrderDate"));
+                OrdertList.add(orders);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
-        return productList;
+        searchOrderList = OrdertList;
+        return OrdertList;
     }
+
+    public void search(){
+
+        FilteredList<Order> filteredData = new FilteredList<>(searchOrderList, p -> true);
+
+        // 2. Set the filter Predicate whenever the filter changes.
+        searchBox.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(myObject -> {
+                // If filter text is empty, display all persons.
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+
+                // Compare first name and last name field in your object with filter.
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (String.valueOf(myObject.getTransactionid()).toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                    // Filter matches first name.
+
+                } else if (String.valueOf(myObject.getWaitername()).toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches last name.
+                }
+                else if (String.valueOf(myObject.getWaitername()).toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches last name.
+                }
+
+                return false; // Does not match.
+            });
+        });
+
+        // 3. Wrap the FilteredList in a SortedList.
+        SortedList<Order> sortedData = new SortedList<>(filteredData);
+
+        // 4. Bind the SortedList comparator to the TableView comparator.
+        sortedData.comparatorProperty().bind(tableProducts.comparatorProperty());
+        // 5. Add sorted (and filtered) data to the table.
+        tableProducts.setItems(sortedData);
+    }
+
 
 }

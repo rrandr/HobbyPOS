@@ -8,6 +8,8 @@ package hobbypos.ralphfx.modal;
  * @author Armero
  */
 
+import hobbypos.ralphfx.model.User;
+
 import java.sql.*;
 
 
@@ -49,6 +51,33 @@ public class DataObj {
 
             if (resultSet.next()) {
                 return true;
+            }
+        } catch (SQLException e) {
+            printSQLException(e);
+        }
+        return false;
+    }
+
+    public boolean validateAdmin(String userID, String password) {
+
+        try {
+            Connection connection = DriverManager.getConnection(DATABASE_URL, DATABASE_USERNAME, DATABASE_PASSWORD);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_QUERY);
+            preparedStatement.setString(1, userID);
+            preparedStatement.setString(2, password);
+
+            System.out.println(preparedStatement);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            System.out.println(resultSet);
+            User user;
+            if (resultSet.next()) {
+                user = new User(resultSet.getInt("userType"),resultSet.getString("firstName"),resultSet.getString("lastName"));
+                    if(user.getUserType()==1){
+                        return true;
+                    }
+
             }
         } catch (SQLException e) {
             printSQLException(e);

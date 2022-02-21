@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" id="AnchorPane" prefHeight="400.0" prefWidth="692.0"
+            xmlns="http://javafx.com/javafx/17" fx:controller="hobbypos.ralphfx.VerifyController">
+    <children>
+        <Text layoutX="134.0" layoutY="270.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Employee ID"/>
+        <Text layoutX="143.0" layoutY="329.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password"/>
+        <TextField fx:id="userID" layoutX="223.0" layoutY="243.0" prefHeight="45.0" prefWidth="149.0"/>
+        <Button fx:id="loginBtn" layoutX="472.0" layoutY="310.0" mnemonicParsing="false" onAction="#actionLogin"
+                prefHeight="45.0" prefWidth="178.0" text="Login"/>
+        <Label layoutX="110.0" layoutY="200.0" text="HOBBY RESTOBAR AND KTV">
+            <font>
+                <Font name="Century Gothic Bold" size="26.0"/>
+            </font>
+        </Label>
+        <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="189.0" layoutY="37.0" pickOnBounds="true"
+                   preserveRatio="true">
+            <image>
+                <Image url="@icon.jpg"/>
+            </image>
+        </ImageView>
+        <PasswordField fx:id="passID" layoutX="223.0" layoutY="304.0" prefHeight="45.0" prefWidth="149.0"/>
+        <Text layoutX="32.0" layoutY="362.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Date : "/>
+        <Text layoutX="32.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time :"/>
+        <Label fx:id="dateData" layoutX="76.0" layoutY="349.0"/>
+        <Label fx:id="timeData" layoutX="76.0" layoutY="369.0"/>
+        <Button fx:id="seven" layoutX="471.0" layoutY="37.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="7"/>
+        <Button fx:id="eight" layoutX="535.0" layoutY="37.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="8"/>
+        <Button fx:id="nine" layoutX="599.0" layoutY="37.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="9"/>
+        <Button fx:id="four" layoutX="471.0" layoutY="109.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="4"/>
+        <Button fx:id="five" layoutX="535.0" layoutY="109.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="5"/>
+        <Button fx:id="six" layoutX="599.0" layoutY="109.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="6"/>
+        <Button fx:id="one" layoutX="471.0" layoutY="180.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="1"/>
+        <Button fx:id="two" layoutX="535.0" layoutY="180.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="2"/>
+        <Button fx:id="three" layoutX="599.0" layoutY="180.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="53.0" prefWidth="52.0" text="3"/>
+        <Button fx:id="zero" layoutX="471.0" layoutY="251.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="45.0" prefWidth="116.0" text="0"/>
+        <Button fx:id="backs" layoutX="599.0" layoutY="251.0" mnemonicParsing="false" onAction="#inputData"
+                prefHeight="45.0" prefWidth="52.0" text="DEL"/>
+    </children>
+</AnchorPane>

@@ -22,6 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -31,14 +32,17 @@ import javax.print.attribute.PrintRequestAttributeSet;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.sql.Types.NULL;
 
 public class PaymentController implements Initializable {
     @FXML
@@ -154,7 +158,7 @@ public class PaymentController implements Initializable {
 
         if (provideInput(source).contentEquals("123")) {
             paymentTxt.setText(removeLastCharOptional(tempTxt));
-            if( paymentTxt.getText().equals("")){
+            if (paymentTxt.getText().equals("")) {
                 paymentTxt.setText("0");
             }
         } else {
@@ -199,7 +203,7 @@ public class PaymentController implements Initializable {
 
     String discountData;
 
-    public void updateNumbers(){
+    public void updateNumbers() {
 
         DecimalFormat df = new DecimalFormat("#.##");
         int totalDue = ttotalDisplay;
@@ -207,29 +211,29 @@ public class PaymentController implements Initializable {
         double discount = getdiscount(voucherCombo.getSelectionModel().getSelectedItem().toString());
         double finalT = totalDue * discount;
         double total = totalDue - finalT;
-        double change= cash - total;
-        if(discount==1){
-            change= cash - totalDue;
+        double change = cash - total;
+        if (discount == 1) {
+            change = cash - totalDue;
             discountTxt.setText("N/A");
             changeTxt.setText(Double.toString(Double.parseDouble(df.format(change))));
             totalAmount.setText(Double.toString(Double.parseDouble(df.format(ttotalDisplay))));
             discountData = "0";
-        }else if(discount==100){
+        } else if (discount == 100) {
             discountTxt.setText("Charge Waved");
             changeTxt.setText("0");
             totalAmount.setText("0");
             discountData = "Owner Waived";
 
-        }else{
-            discountTxt.setText("P"+Double.toString(Double.parseDouble(df.format(discount)))+"%");
+        } else {
+            discountTxt.setText("P" + Double.toString(Double.parseDouble(df.format(discount))) + "%");
             changeTxt.setText(Double.toString(Double.parseDouble(df.format(change))));
             totalAmount.setText(Double.toString(Double.parseDouble(df.format(total))));
             discountData = df.format(finalT);
         }
 
 
-
     }
+
     private void addListenerForTable() {
         voucherCombo.valueProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -240,11 +244,12 @@ public class PaymentController implements Initializable {
 
 
     }
+    ObservableList<TempOrder> forPrintList = FXCollections.observableArrayList();
     private ObservableList<TempOrder> getProductList() {
         ObservableList<TempOrder> OrderList = FXCollections.observableArrayList();
 
         Connection conn = jbdc.getConnection();
-        String query = "SELECT * FROM temporder WHERE transactionid='"+ transactionID +"'";
+        String query = "SELECT * FROM temporder WHERE transactionid='" + transactionID + "'";
         Statement st;
         ResultSet rs;
         System.err.println("Inside 2: " + query);
@@ -267,27 +272,93 @@ public class PaymentController implements Initializable {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
+        forPrintList = OrderList;
         return OrderList;
     }
 
+    String Vusername= "N/A";
 
     @FXML
-    private void payBill() throws PrintException, IOException {
+    private void payBill(ActionEvent event) throws PrintException, IOException {
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Pay Bill");
-        alert.setHeaderText("Are you sure want to print Final Bill?");
+        String discount = voucherCombo.getSelectionModel().getSelectedItem().toString();
+        double change = Double.parseDouble(changeTxt.getText());
+        if (change >= 0) {
+            if (discount.equals("Owner")) {
+                Stage stage = new Stage();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("verify.fxml"));
+                Parent root = loader.load();
+                // I guess you forgot this line????
+                stage.setScene(new Scene(root));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.initOwner(PayBtn.getScene().getWindow());
+                stage.showAndWait();
 
-        // option != null.
-        Optional<ButtonType> option = alert.showAndWait();
+                VerifyController dashboard = loader.getController();
+                Boolean selectedData = dashboard.getSelectedData();
+                Vusername = dashboard.getVoider();
 
-        if (option.get() == ButtonType.OK) {
-            officialreceipt();
-            alert.close();
+                if (selectedData.equals(true)) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Pay Bill");
+                    alert.setHeaderText("Are you sure want to print Final Bill?");
 
-        } else if (option.get() == ButtonType.CANCEL) {
 
+                    // option != null.
+                    Optional<ButtonType> option = alert.showAndWait();
+
+                    if (option.get() == ButtonType.OK) {
+                        officialreceipt();
+                        insertOrder();
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
+                        Parent roots = fxmlLoader.load();
+
+                        Stage stages = new Stage();
+                        stages.setTitle("Hobby Bar POS | Dashboard");
+                        stages.setScene(new Scene(roots));
+                        stages.show();
+                        ((Node) (event.getSource())).getScene().getWindow().hide();
+
+                    } else if (option.get() == ButtonType.CANCEL) {
+
+                    }
+                } else {
+                    Alert alertz = new Alert(Alert.AlertType.ERROR);
+                    alertz.setTitle("Error");
+                    alertz.setHeaderText("Only Authorized Person Only");
+
+                }
+            } else {
+                Alert alerts = new Alert(Alert.AlertType.CONFIRMATION);
+                alerts.setTitle("Pay Bill");
+                alerts.setHeaderText("Are you sure want to print Final Bill?");
+
+                // option != null.
+                Optional<ButtonType> option = alerts.showAndWait();
+
+                if (option.get() == ButtonType.OK) {
+                    officialreceipt();
+                    insertOrder();
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
+                    Parent rootz = fxmlLoader.load();
+
+                    Stage stagez = new Stage();
+                    stagez.setTitle("Hobby Bar POS | Dashboard");
+                    stagez.setScene(new Scene(rootz));
+                    stagez.show();
+                    ((Node) (event.getSource())).getScene().getWindow().hide();
+
+                } else if (option.get() == ButtonType.CANCEL) {
+
+                }
+            }
+        }
+
+        if(change<0){
+            Alert alertsss = new Alert(Alert.AlertType.ERROR);
+            alertsss.setTitle("Pay Bill");
+            alertsss.setHeaderText("Input Sufficient Money");
+            alertsss.showAndWait();
         }
 
     }
@@ -492,6 +563,7 @@ public class PaymentController implements Initializable {
                     .writeLF("------------------------------------------------")
                     .writeLF(bold, "     Total Due                     P" + totalDuetxt.getText())
                     .writeLF(bold, "     Discount                      " + discountData)
+                    .writeLF(bold, "     Authorized by                 " + Vusername)
                     .feed(1)
                     .writeLF(bold, "     Total(w/ Discount)            P" + totalAmount.getText())
                     .writeLF(bold, "     CASH                          P" + paymentTxt.getText())
@@ -514,30 +586,32 @@ public class PaymentController implements Initializable {
 
 
     }
-public double getdiscount(String voucher){
-    Connection conn = jbdc.getConnection();
-    Statement st;
-    double discount=0;
-    //System.out.println(query);
-    try {
-        //st = conn.createStatement();
-        //st.executeUpdate(query);
 
-        ResultSet rs = conn.createStatement().executeQuery("select * from voucher");
+    public double getdiscount(String voucher) {
+        Connection conn = jbdc.getConnection();
+        Statement st;
+        double discount = 0;
+        //System.out.println(query);
+        try {
+            //st = conn.createStatement();
+            //st.executeUpdate(query);
 
-        while (rs.next()) {
-            if(rs.getString("vouchername").equals(voucher)){
-                discount = rs.getDouble("content");
+            ResultSet rs = conn.createStatement().executeQuery("select * from voucher");
+
+            while (rs.next()) {
+                if (rs.getString("vouchername").equals(voucher)) {
+                    discount = rs.getDouble("content");
+                }
             }
+
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
         }
 
-    } catch (Exception ex) {
-        System.out.println("error while inserting record.");
-        ex.printStackTrace();
+        return discount;
     }
 
-    return discount;
-}
     public void openCashDrawer() {
 
         byte[] open = {27, 112, 0, 100, (byte) 250};
@@ -556,6 +630,97 @@ public double getdiscount(String voucher){
         }
     }
 
+    public void insertOrder() {
+        String tablen = "";
+        String transactions = "";
+        try {
 
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+            LocalDateTime now = LocalDateTime.now();
+            String time = dtf.format(now);
+            DataObj jdbc = new DataObj();
+            Connection conn = jdbc.getConnection();
+            conn.setAutoCommit(false);
+
+            PreparedStatement prepStmt = conn.prepareStatement("insert into orders (orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink,orderDate) values('" + NULL + "',?,?,?,?,?,?,?,?,?)");
+            Iterator<TempOrder> tp = forPrintList.iterator();
+
+            while (tp.hasNext()) {
+
+                TempOrder tempO = tp.next();
+                prepStmt.setString(1, tempO.getTransactionid());
+                prepStmt.setInt(2, tempO.getProductid());
+                prepStmt.setString(3, tempO.getProductname());
+                prepStmt.setInt(4, tempO.getPrice());
+                prepStmt.setInt(5, tempO.getQuantity());
+                prepStmt.setString(6, tempO.getTableName());
+                prepStmt.setString(7, tempO.getWaitername());
+                prepStmt.setString(8, tempO.getDrink());
+                prepStmt.setString(9, time);
+                prepStmt.addBatch();
+
+                tablen = tempO.getTableName();
+                transactions = tempO.getTransactionid();
+            }
+
+
+            int[] numUpdates = prepStmt.executeBatch();
+            for (int i = 0; i < numUpdates.length; i++) {
+                if (numUpdates[i] == -2)
+                    System.out.println("Execution " + i +
+                            ": unknown number of rows updated");
+                else
+                    System.out.println("Execution " + i +
+                            "successful: " + numUpdates[i] + " rows updated");
+            }
+            conn.commit();
+            updateTableAvail(tablen);
+            deleteEntry(transactions);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void updateTableAvail(String tablen) {
+
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        try {
+
+            String query = "UPDATE tbltables SET tableavail = '0' WHERE name = '" + tablen + "'";
+            executeQuery(query);
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+    }
+
+    private void executeQuery(String query) {
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        System.out.println(query);
+        try {
+            st = conn.createStatement();
+            st.executeUpdate(query);
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
+    }
+
+    private void deleteEntry(String transID) {
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        try {
+            String query = "DELETE FROM temporder WHERE transactionid = '" + transID + "'";
+            executeQuery(query);
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
 }
 

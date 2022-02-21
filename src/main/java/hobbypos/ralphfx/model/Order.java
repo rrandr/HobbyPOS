@@ -14,23 +14,40 @@ public class Order {
     private int productid;
     private int price;
     private int quantity;
-    private String tablename;
-    private String waitername;
+    private String waiterName;
     private String productname;
     private String tableName;
+    private String orderDate;
+    private String drink;
     private int total;
 
-    public Order(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN) {
+    public Order(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks, String dates) {
         this.orderid = orderID;
         this.productid = productID;
         this.productname = productName;
         this.price = pPrice;
         this.transactionid = transactionID;
         this.quantity = qquantity;
-        this.tablename = tName;
-        this.waitername = waiterN;
+        this.tableName = tName;
+        this.waiterName = waiterN;
+        this.drink=drinks;
+        this.orderDate=dates;
     }
 
+    public Order(String transactionID, String tName, String waiterN,String dates){
+        this.transactionid = transactionID;
+        this.tableName = tName;
+        this.waiterName = waiterN;
+        this.orderDate= dates;
+    }
+
+    public String getDrink() {
+        return drink;
+    }
+
+    public void setDrink(String drink) {
+        this.drink = drink;
+    }
 
     public int getId() {
         return orderid;
@@ -61,7 +78,7 @@ public class Order {
     }
 
     public String getWaitername() {
-        return waitername;
+        return waiterName;
     }
 
     public int getOrderid() {
@@ -93,18 +110,30 @@ public class Order {
     }
 
     public String getTableName() {
-        return tablename;
+        return tableName;
     }
 
     public void setTableName(String tableN) {
-        this.tablename = tableN;
+        this.tableName = tableN;
     }
 
     public String getWaiterid() {
-        return waitername;
+        return waiterName;
     }
 
     public String getProductname() {
         return productname;
+    }
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public String getTablename() {
+        return tableName;
+    }
+
+    public void setOrderDate(String orderDate) {
+        this.orderDate = orderDate;
     }
 }

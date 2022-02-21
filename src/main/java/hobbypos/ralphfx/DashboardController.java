@@ -232,7 +232,7 @@ public class DashboardController implements Initializable {
         Optional<ButtonType> option = alert.showAndWait();
 
         if (option.get() == ButtonType.OK) {
-           // sendBill();
+            sendBill();
             checkoutBtn.setDisable(false);
             alert.close();
 
@@ -241,7 +241,6 @@ public class DashboardController implements Initializable {
         }
 
     }
-
 
 
     @FXML
@@ -320,18 +319,9 @@ public class DashboardController implements Initializable {
                 }
                 break;
             case F2:
-                System.out.println("Payment Triggered.");
-                try {
-                    openModalWindow("Receipt.fxml", "Manage Products");
-                } catch (Exception ex) {
-                    System.out.println("" + ex.getMessage());
-                    ex.printStackTrace();
-                }
-                break;
-            case F3:
                 System.out.println("Cancel order.");
                 break;
-            case F4:
+            case F3:
                 System.out.println("Manage products.");
                 try {
                     openModalWindow("Products.fxml", "Manage Products");
@@ -340,7 +330,7 @@ public class DashboardController implements Initializable {
                     ex.printStackTrace();
                 }
                 break;
-            case F5:
+            case F4:
                 System.out.println("Manage Table");
                 try {
                     openModalWindow("Tables.fxml", "Manage Tables");
@@ -349,10 +339,10 @@ public class DashboardController implements Initializable {
                     ex.printStackTrace();
                 }
                 break;
-            case F6:
+            case F5:
                 System.out.println("Sales Report");
                 break;
-            case F7:
+            case F6:
                 try {
                     openModalWindow("Lookup.fxml", "Product Lookup");
                 } catch (Exception ex) {
@@ -360,7 +350,7 @@ public class DashboardController implements Initializable {
                     ex.printStackTrace();
                 }
                 break;
-            case F8:
+            case F7:
                 System.out.println("Logout.");
                 try {
                     Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -476,6 +466,7 @@ public class DashboardController implements Initializable {
                 btn.setOnMousePressed(mouseEvent -> {
                     newOrder.setDisable(true);
                     printBtn.setDisable(false);
+                    checkoutBtn.setDisable(false);
                     addOrder.setDisable(false);
 
                 });
@@ -591,7 +582,7 @@ public class DashboardController implements Initializable {
         }
 
         retrieveOrder = tempOrderList;
-        totalDisplay.setText("₱ " + Total);
+        totalDisplay.setText("P" + Total);
 
         displayOrder();
         return tempOrderList;
@@ -730,7 +721,7 @@ public class DashboardController implements Initializable {
             }
             escpos.feed(1)
                     .writeLF("------------------------------------------------")
-                    .writeLF(bold, "     Total                         P" + totalDisplay.getText())
+                    .writeLF(bold, "     Total Due                     " + totalDisplay.getText())
                     .writeLF("------------------------------------------------")
                     .feed(1)
                     .writeLF(waiterb, "WAITER COPY")
@@ -744,6 +735,170 @@ public class DashboardController implements Initializable {
         }
 
 
+    }
+
+
+    public void voidBill() throws PrintException, IOException {
+
+
+        PrintService printService = PrinterOutputStream.getPrintServiceByName(Cashier);
+        // get the printer service by name passed on command line...
+        //this call is slow, try to use it only once and reuse the PrintService variable.
+        EscPos escpos;
+
+        try {
+            escpos = new EscPos(new PrinterOutputStream(printService));
+            Style title = new Style()
+                    .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                    .setJustification(EscPosConst.Justification.Center);
+
+
+            Style subtitle = new Style(escpos.getStyle())
+                    .setBold(true)
+                    .setUnderline(Style.Underline.OneDotThick);
+            Style bold = new Style(escpos.getStyle())
+                    .setBold(true)
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1);
+            Style totalb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style waiterb = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Center);
+            Style item = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(false)
+                    .setJustification(EscPosConst.Justification.Left_Default);
+            Style totalss = new Style(escpos.getStyle())
+                    .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                    .setBold(true)
+                    .setJustification(EscPosConst.Justification.Right);
+
+            escpos.feed(2)
+                    .writeLF(totalb, "HOBBY Restobar")
+                    .writeLF(totalb, "& KTV")
+                    .feed(1)
+                    .writeLF(waiterb, "Polog Consolacion   ")
+                    .writeLF(waiterb, "6001 Consolacion,Philippines")
+                    .feed(2)
+                    .writeLF(totalb, "VOID ORDER RECEIPT")
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold, "  Transaction no.   : " + transID)
+                    .writeLF(bold, "  Waiter            : " + WaiterN)
+                    .writeLF(bold, "  Table             : " + TableName)
+                    .writeLF(bold, "  VOID BY           : " + WaiterN)
+                    .writeLF("------------------------------------------------")
+                    .feed(1);
+
+
+            ObservableList<TempOrder> tempOrderList = FXCollections.observableArrayList();
+            Connection conn = jdbc.getConnection();
+            String query = "SELECT * FROM temporder WHERE transactionid='" + transID + "'";
+            Statement st;
+            ResultSet rs;
+            int Total = 0;
+            try {
+                st = conn.createStatement();
+                rs = st.executeQuery(query);
+                TempOrder temporder;
+
+                while (rs.next()) {
+                    temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                    int total = rs.getInt("quantity") * rs.getInt("price");
+
+                    escpos.writeLF(item, rs.getInt("quantity") + " X " + rs.getInt("price") + ".0           " + rs.getString("productname")).write(totalss, " P" + total)
+                            .writeLF(totalss, "");
+
+
+                }
+
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+            escpos.feed(1)
+                    .writeLF("------------------------------------------------")
+                    .writeLF(bold, "     Total Due                     " + totalDisplay.getText())
+                    .writeLF("------------------------------------------------")
+                    .feed(1)
+                    .writeLF(waiterb, "CASHIER COPY")
+                    .feed(7)
+                    .cut(EscPos.CutMode.FULL);
+
+            escpos.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
+    @FXML
+    private Button cancelBtn;
+
+    @FXML
+    private void deleteOrder(ActionEvent event) throws SQLException, IOException {
+
+        Stage stage = new Stage();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("verify.fxml"));
+        Parent root = loader.load();
+        // I guess you forgot this line????
+        stage.setScene(new Scene(root));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(cancelBtn.getScene().getWindow());
+        stage.showAndWait();
+
+        VerifyController dashboard = loader.getController();
+        Boolean selectedData = dashboard.getSelectedData();
+
+
+        if (selectedData.equals(true)) {
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Cancel Order");
+            alert.setHeaderText("Are you sure want to cancel this Order?");
+
+            // option != null.
+            Optional<ButtonType> option = alert.showAndWait();
+
+            Connection conn = jdbc.getConnection();
+            if (option.get() == ButtonType.OK) {
+
+
+                // sendBill();
+                String query = "DELETE FROM temporder WHERE transactionid = '" + transID + "'";
+                executeQuery(query);
+
+                String querys = "UPDATE tbltables SET tableavail = '0' WHERE name = '" + TableName + "'";
+                executeQuery(querys);
+                itemOrder.refresh();
+                retrieveTable();
+                seeAvailableTable();
+
+
+            } else if (option.get() == ButtonType.CANCEL) {
+
+            }
+        } else {
+            Alert alerts = new Alert(AlertType.ERROR);
+            alerts.setTitle("Error");
+            alerts.setHeaderText("Only Authorized Person Only");
+        }
+
+    }
+
+    private void executeQuery(String query) {
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        System.out.println(query);
+        try {
+            st = conn.createStatement();
+            st.executeUpdate(query);
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
     }
 
 
