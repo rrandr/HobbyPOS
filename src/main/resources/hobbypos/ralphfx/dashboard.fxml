@@ -106,7 +106,7 @@
                         <Font name="System Bold" size="12.0" />
                     </font>
                 </Button>
-                <Button layoutX="358.0" layoutY="20.0" mnemonicParsing="false" onAction="#actionManageProduct" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F3 - Manage Product]" textFill="WHITE">
+                <Button fx:id="manageProduct" layoutX="358.0" layoutY="20.0" mnemonicParsing="false" onAction="#actionManageProduct" prefHeight="54.0" prefWidth="149.0" style="-fx-background-color: #26c6da;" text="[F3 - Manage Product]" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>

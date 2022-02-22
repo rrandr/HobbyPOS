@@ -104,6 +104,8 @@ public class DashboardController implements Initializable {
     private Label totalDisplay;
     @FXML
     private TableView<TempOrder> itemOrder;
+    @FXML
+    private Button manageProduct;
 
     public static Stage getPrimaryStage() {
         return pStage;
@@ -133,7 +135,7 @@ public class DashboardController implements Initializable {
 
 
     @FXML
-    public void refresh(){
+    public void refresh() {
         try {
             jdbc = new DataObj();
 
@@ -154,7 +156,25 @@ public class DashboardController implements Initializable {
     @FXML
     private void manageTable(ActionEvent event) {
         try {
-            openModalWindow("Tables.fxml", "Manage Tables");
+            Stage stage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("verify.fxml"));
+            Parent root = loader.load();
+            // I guess you forgot this line????
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(btnManageTable.getScene().getWindow());
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
+            stage.showAndWait();
+
+            VerifyController dashboard = loader.getController();
+            Boolean selectedData = dashboard.getSelectedData();
+            if (selectedData.equals(true)) {
+                openModalWindow("Tables.fxml", "Manage Tables");
+            } else {
+                Alert alertz = new Alert(Alert.AlertType.ERROR);
+                alertz.setTitle("Error");
+                alertz.setHeaderText("Only Authorized Person Only");
+            }
         } catch (Exception ex) {
             System.out.println("" + ex.getMessage());
             ex.printStackTrace();
@@ -311,7 +331,26 @@ public class DashboardController implements Initializable {
     @FXML
     private void actionManageProduct(ActionEvent event) {
         try {
-            openModalWindow("Products.fxml", "Manage Products");
+            Stage stage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("verify.fxml"));
+            Parent root = loader.load();
+            // I guess you forgot this line????
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(manageProduct.getScene().getWindow());
+            stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
+            stage.showAndWait();
+
+            VerifyController dashboard = loader.getController();
+            Boolean selectedData = dashboard.getSelectedData();
+
+            if (selectedData.equals(true)) {
+                openModalWindow("Products.fxml", "Manage Products");
+            } else {
+                Alert alertz = new Alert(Alert.AlertType.ERROR);
+                alertz.setTitle("Error");
+                alertz.setHeaderText("Only Authorized Person Only");
+            }
         } catch (Exception ex) {
 
         }
