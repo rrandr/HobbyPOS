@@ -252,21 +252,52 @@ public class LoginController implements Initializable {
         } else {
 
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
-                Parent root = fxmlLoader.load();
+                if (jdbcDao.getUserType().equals(1)) {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("admin.fxml"));
+                    Parent root = fxmlLoader.load();
 
-                Stage stage = new Stage();
-                stage.setTitle("Hobby Bar POS | Dashboard");
+                    Stage stage = new Stage();
+                    stage.setTitle("Hobby RestoBar POS | ADMIN DASHBOARD");
 
-                stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
-                stage.setScene(new Scene(root));
+                    stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
+                    stage.setScene(new Scene(root));
 
-                System.err.println(getUserInfo(Integer.parseInt(username)));
+                    System.err.println(getUserInfo(Integer.parseInt(username)));
+                    stage.show();
+                    ((Node) (event.getSource())).getScene().getWindow().hide();
+                } else if (jdbcDao.getUserType().equals(3)) {
+                    FXMLLoader fxmlLoaders = new FXMLLoader(getClass().getResource("dashboard.fxml"));
+                    Parent roots = fxmlLoaders.load();
 
-                DashboardController controller = (DashboardController) fxmlLoader.getController();
-                controller.setUsername(name);
-                stage.show();
-                ((Node) (event.getSource())).getScene().getWindow().hide();
+                    Stage stages = new Stage();
+                    stages.setTitle("Hobby Bar KTV POS | Dashboard");
+
+                    stages.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
+                    stages.setScene(new Scene(roots));
+
+                    System.err.println(getUserInfo(Integer.parseInt(username)));
+
+                    DashboardController controller = (DashboardController) fxmlLoaders.getController();
+                    controller.setUsername(name);
+                    stages.show();
+                    ((Node) (event.getSource())).getScene().getWindow().hide();
+                }else if (jdbcDao.getUserType().equals(4)) {
+                    FXMLLoader fxmlLoaders = new FXMLLoader(getClass().getResource("KTVController.fxml"));
+                    Parent roots = fxmlLoaders.load();
+
+                    Stage stages = new Stage();
+                    stages.setTitle("Hobby Bar KTV POS | Dashboard");
+
+                    stages.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
+                    stages.setScene(new Scene(roots));
+
+                    System.err.println(getUserInfo(Integer.parseInt(username)));
+
+                    KTVController controller = (KTVController) fxmlLoaders.getController();
+                    controller.setUsername(name);
+                    stages.show();
+                    ((Node) (event.getSource())).getScene().getWindow().hide();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

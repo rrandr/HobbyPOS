@@ -48,8 +48,10 @@ public class DataObj {
             System.out.println(preparedStatement);
             ResultSet resultSet = preparedStatement.executeQuery();
             System.out.println(resultSet);
-
+            User user;
             if (resultSet.next()) {
+                user = new User(resultSet.getInt("userType"),resultSet.getString("firstName"),resultSet.getString("lastName"));
+                userType = user.getUserType();
                 return true;
             }
         } catch (SQLException e) {
@@ -57,7 +59,7 @@ public class DataObj {
         }
         return false;
     }
-
+    int userType;
     public boolean validateAdmin(String userID, String password) {
 
         try {
@@ -74,7 +76,8 @@ public class DataObj {
             User user;
             if (resultSet.next()) {
                 user = new User(resultSet.getInt("userType"),resultSet.getString("firstName"),resultSet.getString("lastName"));
-                    if(user.getUserType()==1){
+                    userType = user.getUserType();
+                if(user.getUserType()==1){
                         return true;
                     }
 
@@ -83,6 +86,11 @@ public class DataObj {
             printSQLException(e);
         }
         return false;
+    }
+
+
+    public Integer getUserType(){
+        return userType;
     }
 
     public Connection getConnection() {
