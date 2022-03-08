@@ -272,7 +272,33 @@ public class VerifyController implements Initializable {
 
 
 
+    private void saveVoid(String cashier){
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        try {
 
+            String query = "UPDATE current_login SET cashier = '" + cashier + "' WHERE id = 2";
+            executeQuery(query);
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void executeQuery(String query) {
+
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        System.out.println(query);
+        try {
+            st = conn.createStatement();
+            st.executeUpdate(query);
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
+    }
 
     private ObservableList<User> getUserInfo(int userID) {
         DataObj jdbcDao = new DataObj();
@@ -290,6 +316,7 @@ public class VerifyController implements Initializable {
                 user = new User(rs.getInt("userType"), rs.getString("firstName"), rs.getString("lastName"));
                 name = "Welcome : " + rs.getString("firstName") + " " + rs.getString("lastName");
                 Ausername = rs.getString("firstName") +" "+ rs.getString("lastName");
+                saveVoid(Ausername);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());

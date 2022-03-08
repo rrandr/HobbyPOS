@@ -72,7 +72,7 @@ public class AdminController  implements Initializable {
     @FXML
     private void openRetail(ActionEvent event) {
         try {
-            openModalWindow("Lookup.fxml", "Hobby Retail Store");
+            openModalWindow("retail.fxml", "Hobby Retail Store");
         } catch (Exception ex) {
             System.out.println("" + ex.getMessage());
             ex.printStackTrace();

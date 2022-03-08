@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="602.0" prefWidth="874.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hobbypos.ralphfx.SalesController">
+   <children>
+      <Label layoutX="46.0" layoutY="58.0" text="1000 X">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="55.0" layoutY="105.0" text="500 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="55.0" layoutY="152.0" text="200 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="55.0" layoutY="198.0" text="100 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="68.0" layoutY="244.0" text="50 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="69.0" layoutY="290.0" text="20 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="68.0" layoutY="336.0" text="10 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="74.0" layoutY="382.0" text=" 1 X ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="onethou" layoutX="129.0" layoutY="51.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="fivehund" layoutX="129.0" layoutY="97.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="twohund" layoutX="129.0" layoutY="144.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="onehund" layoutX="129.0" layoutY="190.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="fifty" layoutX="129.0" layoutY="236.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="twenty" layoutX="129.0" layoutY="283.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="ten" layoutX="129.0" layoutY="328.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <TextField fx:id="one" layoutX="129.0" layoutY="374.0" prefHeight="38.0" prefWidth="52.0" text="0" />
+      <Label layoutX="50.0" layoutY="437.0" text="Total :">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="totalTxt" editable="false" layoutX="129.0" layoutY="429.0" prefHeight="38.0" prefWidth="109.0" text="0">
+         <font>
+            <Font name="Verdana Bold" size="20.0" />
+         </font>
+      </TextField>
+      <TableView fx:id="tableProducts" layoutX="290.0" layoutY="38.0" prefHeight="379.0" prefWidth="560.0">
+        <columns>
+          <TableColumn fx:id="colTrans" prefWidth="117.0" text="Transaction No." />
+          <TableColumn fx:id="colTable" minWidth="2.0" prefWidth="103.0" text="Table" />
+            <TableColumn fx:id="colWaiter" prefWidth="75.0" text="Waiter" />
+            <TableColumn fx:id="colTotal" prefWidth="58.0" text="Total" />
+            <TableColumn fx:id="colTime" prefWidth="114.0" text="Time" />
+            <TableColumn fx:id="colDate" prefWidth="92.0" text="Date" />
+        </columns>
+      </TableView>
+      <Button fx:id="seeOrders" disable="true" layoutX="762.0" layoutY="430.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="88.0" text="See Orders" />
+      <Label layoutX="290.0" layoutY="437.0" text="Total Sales : ₱ ">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="salesTxt" layoutX="444.0" layoutY="437.0" text="0">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="recordBtn" disable="true" layoutX="129.0" layoutY="529.0" mnemonicParsing="false" onAction="#insertRecord" prefHeight="38.0" prefWidth="109.0" text="RECORD SALES" />
+      <Label layoutX="24.0" layoutY="14.0" text="Cashier :">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="cashierTxt" layoutX="120.0" layoutY="14.0" text="user">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="searchBox" layoutX="405.0" layoutY="13.0" prefHeight="25.0" prefWidth="361.0" />
+      <Label layoutX="309.0" layoutY="14.0" text="SEARCH">
+         <font>
+            <Font name="Verdana Bold" size="18.0" />
+         </font>
+      </Label>
+      <Button layoutX="129.0" layoutY="468.0" mnemonicParsing="false" onAction="#calculates" prefHeight="38.0" prefWidth="109.0" text="Calculate" />
+      <Button fx:id="backBtn" layoutX="772.0" layoutY="554.0" mnemonicParsing="false" onAction="#onBack" prefHeight="38.0" prefWidth="72.0" text="Back">
+         <font>
+            <Font name="Verdana Bold" size="12.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

@@ -18,10 +18,12 @@ public class Order {
     private String productname;
     private String tableName;
     private String orderDate;
+    private String orderTime;
     private String drink;
-    private int total;
+    private String cashier;
+    private int totals;
 
-    public Order(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks, String dates) {
+    public Order(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks, String dates,String timers,String cashiers) {
         this.orderid = orderID;
         this.productid = productID;
         this.productname = productName;
@@ -32,6 +34,24 @@ public class Order {
         this.waiterName = waiterN;
         this.drink=drinks;
         this.orderDate=dates;
+        this.orderTime=timers;
+        this.cashier=cashiers;
+    }
+
+    public Order(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks, String dates , int total) {
+        this.orderid = orderID;
+        this.productid = productID;
+        this.productname = productName;
+        this.price = pPrice;
+        this.transactionid = transactionID;
+        this.quantity = qquantity;
+        this.tableName = tName;
+        this.waiterName = waiterN;
+        this.drink=drinks;
+        this.orderDate=dates;
+        total  = pPrice * qquantity;
+        this.totals = total;
+
     }
 
     public Order(String transactionID, String tName, String waiterN,String dates){
@@ -39,6 +59,23 @@ public class Order {
         this.tableName = tName;
         this.waiterName = waiterN;
         this.orderDate= dates;
+    }
+
+    public Order(String transactionID, String tName, String waiterN,int totalss,String dates,String times){
+        this.transactionid = transactionID;
+        this.tableName = tName;
+        this.waiterName = waiterN;
+        this.orderDate= dates;
+        this.totals=totalss;
+        this.orderTime=times;
+    }
+
+    public void setOrderTime(String orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public String getOrderTime() {
+        return orderTime;
     }
 
     public String getDrink() {
@@ -70,11 +107,11 @@ public class Order {
     }
 
     public int getTotal() {
-        return total;
+        return totals;
     }
 
     public void setTotal(int ptotal) {
-        total = ptotal;
+        totals = ptotal;
     }
 
     public String getWaitername() {

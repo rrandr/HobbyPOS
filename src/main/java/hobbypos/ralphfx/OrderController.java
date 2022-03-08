@@ -284,6 +284,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
     }
 
+
     private void UpdateOrderDB(ActionEvent event) {
 
         try {
@@ -298,8 +299,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 stage.getIcons().add(new Image(String.valueOf(this.getClass().getResource("icon2.png"))));
                 stage.initOwner(updateOrdBtn.getScene().getWindow());
                 stage.showAndWait();
-
-
 
 
                 VerifyController dashboard = loader.getController();
@@ -495,18 +494,20 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             if (!finalOrder.isEmpty()) {
                 updateOrdBtn.setDisable(true);
                 saveOrdBtn.setDisable(false);
-
                 Iterator<TempOrder> tps = finalOrder.iterator();
 
                 while (tps.hasNext()) {
                     TempOrder tempsO = tps.next();
                     System.err.println(tempsO.getProductname() + " - " + pName);
+                    tableOrder.refresh();
                     if (tempsO.getProductname().equals(pName)) {
                         int origQ = tempsO.getQuantity();
-                        tempsO.setQuantity(origQ + quantity);
-
                         int total = tempsO.getPrice() * tempsO.getQuantity();
-                        ttotalDisplay = ttotalDisplay + total;
+                        tempsO.setQuantity(origQ + quantity);
+                        tempsO.setTotal(tempsO.getTotal());
+                        System.err.println(tempsO.getProductname() + " - " + pName + "  Total - " + total);
+
+                        tableOrder.refresh();
                         duplicate = 1;
                     }
                 }
@@ -520,13 +521,12 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
                 orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
                 orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
 
 
-                // tableOrder.setItems(finalOrder);
+                tableOrder.refresh();
 
                 totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
-                tableOrder.refresh();
                 duplicate = 0;
             }
 
@@ -541,13 +541,17 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 while (tps.hasNext()) {
                     TempOrder tempsO = tps.next();
                     System.err.println(tempsO.getProductname() + " - " + pName);
+                    tableOrder.refresh();
                     if (tempsO.getProductname().equals(pName)) {
-                        int origQ = tempsO.getQuantity();
-                        tempsO.setQuantity(origQ + quantity);
 
                         int total = tempsO.getPrice() * tempsO.getQuantity();
-                        ttotalDisplay = ttotalDisplay + total;
+                        int origQ = tempsO.getQuantity();
+                        tempsO.setTotal(total * quantity);
+                        tempsO.setQuantity(origQ + quantity);
+                        System.err.println(tempsO.getProductname() + " - " + pName + "  Total - " + total);
+                        tableOrder.refresh();
                         dup = 1;
+
                     }
                 }
 
@@ -560,17 +564,25 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
                 orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
                 orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+                orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
 
 
                 // tableOrder.setItems(finalOrder);
 
-                totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+
                 tableOrder.refresh();
                 dup = 0;
             }
             System.err.println("Hello");
 
+        }
+
+        int Total = 0;
+        for (TempOrder o : tableOrder.getItems()) {
+            System.err.println(orderTotal.getCellData(o));
+            Total = Total + orderTotal.getCellData(o);
+            totalDisplay.setText("₱ " + Integer.toString(Total));
+            ttotalDisplay=Total;
         }
 
     }
@@ -584,7 +596,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
 
 
-        temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks);
+        temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks, pPrice * quantity);
         displayOrderList.add(temporderD);
 
         if (drinks.equals("YES")) {
@@ -593,7 +605,6 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         } else {
             foodCheck = 1;
         }
-        ttotalDisplay = ttotalDisplay + Total;
 
 
         return displayOrderList;
@@ -601,27 +612,26 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
     public void displayOrder() {
 
-        ObservableList<TempOrder> list = getTempList();
+
+        ObservableList<TempOrder> lister = getTempList();
 
         orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
         orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
         orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
 
 
-        if (list.isEmpty()) {
-            tableOrder.setItems(list);
-            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
+        if (lister.isEmpty()) {
+            tableOrder.setItems(lister);
 
         } else {
 
-            tableOrder.getItems().addAll(list);
-            finalOrder.addAll(list);
+            tableOrder.getItems().addAll(lister);
+            finalOrder.addAll(lister);
 
-
-            totalDisplay.setText("₱ " + Integer.toString(ttotalDisplay));
 
         }
+        tableOrder.refresh();
 
     }
 
@@ -634,7 +644,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
 
 
-        temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks);
+        temporderD = new TempOrder(NULL, transactionids, pID, pName, pPrice, quantity, tableNumtxt.getText(), waiterName, drinks, pPrice * quantity);
         displayOrderList.add(temporderD);
 
 
@@ -647,9 +657,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         }
 
 
-        ttotalDisplay = ttotalDisplay + Total;
-
-
+        tableOrder.refresh();
         return displayOrderList;
     }
 
@@ -660,7 +668,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
         orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
         orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
 
 
         tableOrder.getItems().addAll(list);
@@ -703,24 +711,22 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 s = mywaiterList.getSelectionModel().getSelectedItem().toString();
                 System.err.println(s + " - " + oldWaiter);
-                if (s.equals(oldWaiter)){
-                    if(tranOrderID.equals("")) {
+                if (s.equals(oldWaiter)) {
+                    if (tranOrderID.equals("")) {
                         saveOrdBtn.setDisable(false);
                         updateOrdBtn.setDisable(true);
                         addToOrderBtn.setDisable(false);
-                    }else
-                    {
+                    } else {
                         saveOrdBtn.setDisable(true);
                         updateOrdBtn.setDisable(false);
                         addToOrderBtn.setDisable(false);
                     }
                 } else {
-                    if(tranOrderID.equals("")) {
+                    if (tranOrderID.equals("")) {
                         saveOrdBtn.setDisable(false);
                         updateOrdBtn.setDisable(true);
                         addToOrderBtn.setDisable(false);
-                    }else
-                    {
+                    } else {
                         saveOrdBtn.setDisable(true);
                         updateOrdBtn.setDisable(false);
                         addToOrderBtn.setDisable(false);
@@ -750,7 +756,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         orderQnt.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("quantity"));
         orderDesc.setCellValueFactory(new PropertyValueFactory<TempOrder, String>("productname"));
         orderPrice.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
-        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("price"));
+        orderTotal.setCellValueFactory(new PropertyValueFactory<TempOrder, Integer>("total"));
 
         if (list.isEmpty()) {
             tableOrder.setItems(list);
@@ -778,7 +784,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             TempOrder temporder;
 
             while (rs.next()) {
-                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"));
+                temporder = new TempOrder(rs.getInt("orderid"), rs.getString("transactionid"), rs.getInt("productid"), rs.getString("productname"), rs.getInt("price"), rs.getInt("quantity"), rs.getString("tableName"), rs.getString("waiterName"), rs.getString("drink"), rs.getInt("total"));
                 tempOrderList.add(temporder);
                 Total = Total + (temporder.getPrice() * temporder.getQuantity());
                 mywaiterList.getSelectionModel().select(temporder.getWaitername());
@@ -788,6 +794,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 oldWaiter = temporder.getWaitername();
             }
             ttotalDisplay = Total;
+
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -817,7 +824,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                 if (!addNewOrdersList.isEmpty()) {
                     finalOrder.addAll(addNewOrdersList);
                 }
-                PreparedStatement prepStmt = conn.prepareStatement("insert into temporder(orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink) values('" + NULL + "',?,?,?,?,?,?,?,?)");
+                PreparedStatement prepStmt = conn.prepareStatement("insert into temporder(orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink,total) values('" + NULL + "',?,?,?,?,?,?,?,?,?)");
                 Iterator<TempOrder> tp = finalOrder.iterator();
 
                 while (tp.hasNext()) {
@@ -836,6 +843,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     prepStmt.setString(6, tableName);
                     prepStmt.setString(7, waiterName);
                     prepStmt.setString(8, tempO.getDrink());
+                    prepStmt.setInt(9, tempO.getQuantity() * tempO.getPrice());
                     prepStmt.addBatch();
                     if (tempO.getDrink().equals("YES")) {
                         checked = 1;
@@ -1250,6 +1258,11 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         //this call is slow, try to use it only once and reuse the PrintService variable.
         EscPos escpos;
         EscPos escposs;
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+        LocalDateTime now = LocalDateTime.now();
+        String time = dtf.format(now);
+
         try {
             escpos = new EscPos(new PrinterOutputStream(printService));
             String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
@@ -1308,6 +1321,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                                 .writeLF("------------------------------------------------")
                                 .writeLF(bold, "Transaction no. : " + trans)
                                 .writeLF(bold, "Waiter          : " + waiterName)
+                                .writeLF(bold, "Time Ordered    : " + time)
                                 .writeLF("------------------------------------------------")
                                 .feed(2);
                         Iterator<TempOrder> tp = addNewOrdersList.iterator();
@@ -1336,6 +1350,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                                 .writeLF("------------------------------------------------")
                                 .writeLF(bold, "Transaction no. : " + trans)
                                 .writeLF(bold, "Waiter          : " + waiterName)
+                                .writeLF(bold, "Time Ordered    : " + time)
                                 .writeLF("------------------------------------------------")
                                 .feed(2);
                         while (rs.next()) {
@@ -1412,6 +1427,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                         .writeLF("------------------------------------------------")
                         .writeLF(bolds, "Transaction no. : " + transs)
                         .writeLF(bolds, "Waiter          : " + waiterName)
+                        .writeLF(bolds, "Time Cancelled  : " + time)
                         .writeLF(bolds, "Void By         : " + waiterName)
                         .writeLF("------------------------------------------------")
                         .feed(2);
@@ -1450,6 +1466,10 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
         //this call is slow, try to use it only once and reuse the PrintService variable.
         EscPos escpos;
         EscPos escposs;
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+        LocalDateTime now = LocalDateTime.now();
+        String time = dtf.format(now);
 
         try {
             escpos = new EscPos(new PrinterOutputStream(printService));
@@ -1508,10 +1528,11 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                             escpos.writeLF(totalb, "New Order")
                                     .writeLF(totalb, "3rd Floor @" + tableName)
                                     .writeLF(totalb, "BAR Receipt")
-                                    .writeLF("------------------------------------------------")
+                                    .writeLF("--------------------------------")
                                     .writeLF(bold, "Transaction no. : " + trans)
                                     .writeLF(bold, "Waiter          : " + waiterName)
-                                    .writeLF("------------------------------------------------")
+                                    .writeLF(bold, "Time Ordered    : " + time)
+                                    .writeLF("--------------------------------")
                                     .feed(2);
 
                             while (tp.hasNext()) {
@@ -1524,9 +1545,9 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                                 }
                             }
                             escpos.feed(1)
-                                    .writeLF("------------------------------------------------")
+                                    .writeLF("--------------------------------")
                                     .writeLF(waiterb, "Nothing Follows")
-                                    .writeLF("------------------------------------------------")
+                                    .writeLF("--------------------------------")
                                     .feed(5)
                                     .cut(EscPos.CutMode.FULL);
                             escpos.close();
@@ -1536,10 +1557,11 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                     if (!finalOrder.isEmpty() && drinkCheck == 1) {
                         escpos.writeLF(totalb, "3rd Floor @" + tableName)
                                 .writeLF(totalb, "BAR Receipt")
-                                .writeLF("------------------------------------------------")
+                                .writeLF("--------------------------------")
                                 .writeLF(bold, "Transaction no. : " + trans)
                                 .writeLF(bold, "Waiter          : " + waiterName)
-                                .writeLF("------------------------------------------------")
+                                .writeLF(bold, "Time Ordered    : " + time)
+                                .writeLF("--------------------------------")
                                 .feed(2);
 
                         while (rs.next()) {
@@ -1553,9 +1575,9 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                             }
                         }
                         escpos.feed(1)
-                                .writeLF("------------------------------------------------")
+                                .writeLF("--------------------------------")
                                 .writeLF(waiterb, "Nothing Follows")
-                                .writeLF("------------------------------------------------")
+                                .writeLF("--------------------------------")
                                 .feed(5)
                                 .cut(EscPos.CutMode.FULL);
                         escpos.close();
@@ -1615,11 +1637,12 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
                         .feed(2)
                         .writeLF(totalbs, "3rd Floor @" + tableName)
                         .writeLF(totalbs, "BAR Receipt")
-                        .writeLF("------------------------------------------------")
+                        .writeLF("--------------------------------")
                         .writeLF(bolds, "Transaction no. : " + transs)
                         .writeLF(bolds, "Waiter          : " + waiterName)
+                        .writeLF(bolds, "Time Cancelled  : " + time)
                         .writeLF(bolds, "Void By         : " + waiterName)
-                        .writeLF("------------------------------------------------")
+                        .writeLF("--------------------------------")
                         .feed(2);
 
 
@@ -1650,6 +1673,7 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
 
 
     }
+
 
     public void cashierCopy() throws PrintException, IOException {
 
@@ -1787,7 +1811,80 @@ public class OrderController<ByteArrayOuputStream> implements Initializable {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        if (removeChecker == 1 && !displayeRemovedOrder.isEmpty()) {
+            try {
+                PrintService printServices = PrinterOutputStream.getPrintServiceByName(Bar);
+                escpos = new EscPos(new PrinterOutputStream(printServices));
+                String waiterName = mywaiterList.getSelectionModel().getSelectedItem().toString();
+                String tableName = myTableList.getSelectionModel().getSelectedItem().toString();
 
+
+                Style bolds = new Style(escpos.getStyle())
+                        .setBold(true);
+                Style totalbs = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._2, Style.FontSize._2)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+                Style title = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._3, Style.FontSize._3)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+
+                Style waiterbs = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true)
+                        .setJustification(EscPosConst.Justification.Center);
+
+                Style Orders = new Style(escpos.getStyle())
+                        .setFontSize(Style.FontSize._1, Style.FontSize._1)
+                        .setBold(true);
+
+
+                String transs;
+
+                if (tranOrderID.equals("")) {
+                    transs = transactionids;
+                } else {
+                    transs = tranOrderID;
+                }
+
+                escpos.writeLF(title, "CANCEL ORDER")
+                        .feed(2)
+                        .writeLF(totalbs, "3rd Floor @" + tableName)
+                        .writeLF(totalbs, "Cashier Receipt")
+                        .writeLF("------------------------------------------------")
+                        .writeLF(bolds, "Transaction no. : " + transs)
+                        .writeLF(bolds, "Waiter          : " + waiterName)
+                        .writeLF(bolds, "Void By         : " + waiterName)
+                        .writeLF("------------------------------------------------")
+                        .feed(2);
+
+
+                Iterator<TempOrder> tp = displayeRemovedOrder.iterator();
+                while (tp.hasNext()) {
+                    TempOrder tempO = tp.next();
+
+                    int total = tempO.getPrice() * tempO.getQuantity();
+                    if (tempO.getDrink().equals("YES")) {
+                        escpos.write(Orders, tempO.getQuantity() + " X " + tempO.getProductname())
+                                .feed(1);
+                    }
+                }
+
+                escpos.feed(1)
+                        .writeLF("------------------------------------------------")
+                        .writeLF(waiterbs, "Nothing Follows")
+                        .writeLF("------------------------------------------------")
+                        .feed(5)
+                        .cut(EscPos.CutMode.FULL);
+                escpos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }
 

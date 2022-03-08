@@ -37,7 +37,8 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -126,23 +127,23 @@ public class LoginController implements Initializable {
     public void init() {
 
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            LocalTime currentTime = LocalTime.now();
-            String time = "";
 
-            if (currentTime.getHour() < 12) {
-                time = "AM";
-            } else {
-                time = "PM";
-            }
-            dateData.setText(java.time.LocalDate.now().toString());
-            timeData.setText(currentTime.getHour() + ":" + currentTime.getMinute() + ":" + currentTime.getSecond() + " " + time);
+            DateTimeFormatter date = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            DateTimeFormatter times = DateTimeFormatter.ofPattern("hh:mm:ss a");
+            LocalDateTime now = LocalDateTime.now();
+            String dater = date.format(now);
+            String timer = times.format(now);
+
+            dateData.setText(dater);
+            timeData.setText(timer);
         }),
                 new KeyFrame(Duration.seconds(1))
         );
         clock.setCycleCount(Animation.INDEFINITE);
-        clock.play()
+        clock.play();
 
-        ;
+
+
         userID.focusedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue) {
@@ -302,7 +303,40 @@ public class LoginController implements Initializable {
                 ex.printStackTrace();
             }
         }
+
+        saveCashier(name);
     }
+
+
+
+    private void saveCashier(String cashier){
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        try {
+
+            String query = "UPDATE current_login SET cashier = '" + cashier + "' WHERE id = 1";
+            executeQuery(query);
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void executeQuery(String query) {
+
+        DataObj jdbc = new DataObj();
+        Connection conn = jdbc.getConnection();
+        Statement st;
+        System.out.println(query);
+        try {
+            st = conn.createStatement();
+            st.executeUpdate(query);
+        } catch (Exception ex) {
+            System.out.println("error while inserting record.");
+            ex.printStackTrace();
+        }
+    }
+
 
     private ObservableList<User> getUserInfo(int userID) {
         DataObj jdbcDao = new DataObj();
@@ -318,7 +352,7 @@ public class LoginController implements Initializable {
             User user;
             while (rs.next()) {
                 user = new User(rs.getInt("userType"), rs.getString("firstName"), rs.getString("lastName"));
-                name = "Welcome : " + rs.getString("firstName") + " " + rs.getString("lastName");
+                name = rs.getString("firstName") + " " + rs.getString("lastName");
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());

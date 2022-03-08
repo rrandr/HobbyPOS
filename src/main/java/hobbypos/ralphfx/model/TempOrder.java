@@ -19,7 +19,7 @@ public class TempOrder {
     private String productname;
     private String tableName;
     private String drink;
-    private int total;
+    private int totals;
 
     public TempOrder(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks) {
         this.orderid = orderID;
@@ -33,11 +33,25 @@ public class TempOrder {
         this.drink = drinks;
     }
 
+    public TempOrder(int orderID, String transactionID, int productID, String productName, int pPrice, int qquantity, String tName, String waiterN, String drinks, int total) {
+        this.orderid = orderID;
+        this.productid = productID;
+        this.productname = productName;
+        this.price = pPrice;
+        this.transactionid = transactionID;
+        this.quantity = qquantity;
+        this.tablename = tName;
+        this.waitername = waiterN;
+        this.drink = drinks;
+        total = qquantity * pPrice;
+        this.totals = total;
+    }
+
     public TempOrder(String productname, int pPrice, int pQuantity, int ptotal) {
         this.productname = productname;
         this.price = pPrice;
         this.quantity = pQuantity;
-        this.total = ptotal;
+        this.totals = ptotal;
     }
 
     public String getDrink() {
@@ -69,11 +83,11 @@ public class TempOrder {
     }
 
     public int getTotal() {
-        return total;
+        return price*quantity;
     }
 
     public void setTotal(int ptotal) {
-        total = ptotal;
+        this.totals = ptotal;
     }
 
     public String getWaitername() {

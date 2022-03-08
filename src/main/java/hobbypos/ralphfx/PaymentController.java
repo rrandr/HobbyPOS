@@ -6,9 +6,7 @@ import com.github.anastaciocintra.escpos.Style;
 import com.github.anastaciocintra.escpos.image.*;
 import com.github.anastaciocintra.output.PrinterOutputStream;
 import hobbypos.ralphfx.modal.DataObj;
-import hobbypos.ralphfx.model.PrinterData;
-import hobbypos.ralphfx.model.TempOrder;
-import hobbypos.ralphfx.model.Voucher;
+import hobbypos.ralphfx.model.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -94,11 +92,12 @@ public class PaymentController implements Initializable {
 
     DataObj jbdc = new DataObj();
     String transactionID;
+    String name;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         populateDiscount();
-
+        setCashierInfo();
         addListenerForTable();
         getPrinter();
         updateNumbers();
@@ -535,6 +534,7 @@ public class PaymentController implements Initializable {
                     .writeLF(bold, "  Transaction no.   : " + transactionID)
                     .writeLF(bold, "  Waiter            : " + waiterName)
                     .writeLF(bold, "  Table             : " + tableName)
+                    .writeLF(bold, "  Cashier           : " + name)
                     .writeLF("------------------------------------------------")
                     .feed(1);
 
@@ -640,14 +640,17 @@ public class PaymentController implements Initializable {
         String transactions = "";
         try {
 
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDateTime now = LocalDateTime.now();
-            String time = dtf.format(now);
+            String date = dtf.format(now);
+            DateTimeFormatter dtfs = DateTimeFormatter.ofPattern("hh:mm:ss a");
+            LocalDateTime nows = LocalDateTime.now();
+            String times = dtfs.format(nows);
             DataObj jdbc = new DataObj();
             Connection conn = jdbc.getConnection();
             conn.setAutoCommit(false);
 
-            PreparedStatement prepStmt = conn.prepareStatement("insert into orders (orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink,orderDate) values('" + NULL + "',?,?,?,?,?,?,?,?,?)");
+            PreparedStatement prepStmt = conn.prepareStatement("insert into orders (orderid,transactionid,productid,productname,price,quantity,tableName,waiterName,drink,orderDate,total,orderTime,cashier) values('" + NULL + "',?,?,?,?,?,?,?,?,?,?,?,?)");
             Iterator<TempOrder> tp = forPrintList.iterator();
 
             while (tp.hasNext()) {
@@ -661,7 +664,10 @@ public class PaymentController implements Initializable {
                 prepStmt.setString(6, tempO.getTableName());
                 prepStmt.setString(7, tempO.getWaitername());
                 prepStmt.setString(8, tempO.getDrink());
-                prepStmt.setString(9, time);
+                prepStmt.setString(9, date);
+                prepStmt.setInt(10, tempO.getPrice() * tempO.getQuantity() );
+                prepStmt.setString(11, times);
+                prepStmt.setString(12, name);
                 prepStmt.addBatch();
 
                 tablen = tempO.getTableName();
@@ -685,6 +691,29 @@ public class PaymentController implements Initializable {
             e.printStackTrace();
         }
 
+    }
+
+    private ObservableList<CurrentLogin> setCashierInfo() {
+        DataObj jdbcDao = new DataObj();
+        ObservableList<CurrentLogin> UserList = FXCollections.observableArrayList();
+        Connection conn = jdbcDao.getConnection();
+        String query = "SELECT * FROM current_login where id= 1";
+        Statement st;
+        ResultSet rs;
+
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(query);
+            CurrentLogin user;
+            while (rs.next()) {
+                user = new CurrentLogin(rs.getInt("id"), rs.getString("cashier"));
+                name = rs.getString("cashier");
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return UserList;
     }
 
     public void updateTableAvail(String tablen) {

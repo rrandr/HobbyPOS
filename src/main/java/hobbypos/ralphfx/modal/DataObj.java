@@ -14,9 +14,10 @@ import java.sql.*;
 
 
 public class DataObj {
-    private static final String DATABASE_URL = "jdbc:mysql://192.168.1.7:3306/hobbydb";
+   //private static final String DATABASE_URL = "jdbc:mysql://192.168.1.7:3306/hobbydb";
+   private static final String DATABASE_URL = "jdbc:mysql://127.0.0.1:3306/hobbydb";
     private static final String DATABASE_USERNAME = "root";
-    private static final String DATABASE_PASSWORD = "!Aezakmi223";
+    private static final String DATABASE_PASSWORD = "rajv6dyykl";
     private static final String SELECT_QUERY = "SELECT * FROM user WHERE userID = ? AND password = ?";
 
     public static void printSQLException(SQLException ex) {
